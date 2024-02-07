@@ -31,8 +31,7 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
     private final HikariDataSource dataSource;
     private final IBankStoreCache bankStoreCache;
     private final IBankStoreWAL wal;
-    // TODO: from config
-    private final String tableName = "bank";
+    private final String tableName;
 
     public HikariBankStore(
             IBankStoreCache bankStoreCache,
@@ -46,6 +45,9 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
         dataSource.setJdbcUrl(config.jdbcUrl());
         dataSource.setUsername(config.username());
         dataSource.setPassword(config.password());
+
+        // TODO: from config
+        tableName = "bank";
 
         //TODO: config data source
     }

@@ -52,8 +52,7 @@ public final class BankPlusPlus extends JavaPlugin {
 
         final var economy = getEconomy();
         if (economy == null) {
-            // TODO: throw or something, plugin should not be loaded!
-            return;
+            throw new RuntimeException("Could not load Vault!");
         }
         final var balanceManager = new VaultEconomy(
                 economy

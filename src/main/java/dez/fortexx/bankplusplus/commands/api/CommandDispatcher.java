@@ -32,7 +32,6 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
                 subcommands
         );
         this.localization = localization;
-        //TODO: localization
         missingPermissionsComponent = new ComponentBuilder(localization.getCommandBase().getMissingPermission())
                 .color(ChatColor.DARK_RED).create();
     }
@@ -108,7 +107,6 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleErrorResult(@NotNull CommandSender commandSender) {
-        //TODO: localization
         final var component = new ComponentBuilder(localization.getCommandBase().getError())
                 .color(ChatColor.DARK_RED).bold(true)
                 .create();
@@ -127,7 +125,6 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleInvalidUsageResult(@NotNull CommandSender commandSender, @NotNull ICommand subcommand) {
-        // TODO: localization
         final var cb = new ComponentBuilder(localization.getCommandBase().getInvalidUsage())
                 .append(":\n");
         appendCommandHelpLine(subcommand, cb);

@@ -33,7 +33,6 @@ public class DepositCommand implements ICommand {
     ) {
         this.transactionManager = transactionManager;
         this.localization = localization;
-        //TODO: localization
         amountArgument = new BigDecimalArgument(localization.getAmount().toLowerCase());
         this.validator = validator;
         this.currencyFormatter = currencyFormatter;
@@ -46,7 +45,6 @@ public class DepositCommand implements ICommand {
 
     @Override
     public @NotNull String getCommandDescription() {
-        // TODO: localization
         return localization.getCommandDescriptions().getDeposit();
     }
 
