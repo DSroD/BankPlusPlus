@@ -7,6 +7,7 @@ Bank plugin developed for FortexxGaming CraftingDead server
 - Spigot server (or any other fork of Bukkit compatible with SpigotAPI)
     - Tested only on v1.18.2
     - Library downloading based on plugin.yml required
+- Vault plugin
 
 ## Installation
 
