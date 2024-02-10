@@ -11,6 +11,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+//TODO: unit tests
+
+/**
+ * In-memory WAL for storing player transactions
+ */
 public class BankStoreWAL implements IBankStoreWAL {
     private final ConcurrentMap<UUID, List<ITransactionLog>> playerTransactions = new ConcurrentHashMap<>();
 

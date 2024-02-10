@@ -2,6 +2,7 @@ package dez.fortexx.bankplusplus.configuration;
 
 import de.exlll.configlib.Configuration;
 
+@SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
 @Configuration
 public class MysqlConfig {
         private String host = "localhost";

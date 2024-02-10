@@ -2,15 +2,16 @@ package dez.fortexx.bankplusplus.persistence.hikari;
 
 import com.zaxxer.hikari.HikariDataSource;
 import dez.fortexx.bankplusplus.api.banktransactions.TransactionType;
+import dez.fortexx.bankplusplus.async.AsyncTask;
 import dez.fortexx.bankplusplus.async.IAsyncScope;
 import dez.fortexx.bankplusplus.persistence.IBankStore;
 import dez.fortexx.bankplusplus.persistence.IScheduledPersistence;
 import dez.fortexx.bankplusplus.persistence.cache.IBankStoreCache;
 import dez.fortexx.bankplusplus.persistence.cache.snapshot.BankSnapshot;
 import dez.fortexx.bankplusplus.persistence.cache.snapshot.IPlayerBankSnapshot;
-import dez.fortexx.bankplusplus.persistence.utils.Failure;
-import dez.fortexx.bankplusplus.persistence.utils.PersistenceResult;
-import dez.fortexx.bankplusplus.persistence.utils.Success;
+import dez.fortexx.bankplusplus.persistence.api.Failure;
+import dez.fortexx.bankplusplus.persistence.api.PersistenceResult;
+import dez.fortexx.bankplusplus.persistence.api.Success;
 import dez.fortexx.bankplusplus.persistence.wal.BankDepositOrWithdrawTransaction;
 import dez.fortexx.bankplusplus.persistence.wal.BankUpgradeTransaction;
 import dez.fortexx.bankplusplus.persistence.wal.IBankStoreWAL;
@@ -18,6 +19,7 @@ import dez.fortexx.bankplusplus.persistence.wal.IBankStoreWAL;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,14 +34,16 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
     private final IBankStoreCache bankStoreCache;
     private final IBankStoreWAL wal;
     private final String tableName;
+    private final Duration snapshotExpiryDuration;
 
     public HikariBankStore(
             IBankStoreCache bankStoreCache,
             IBankStoreWAL wal,
-            HikariBankStoreConfig config
+            HikariBankStoreConfig config, Duration snapshotExpiryDuration
     ) {
         this.bankStoreCache = bankStoreCache;
         this.wal = wal;
+        this.snapshotExpiryDuration = snapshotExpiryDuration;
         dataSource = new HikariDataSource();
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
         dataSource.setJdbcUrl(config.jdbcUrl());
@@ -89,7 +93,10 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
     }
 
     @Override
-    public PersistenceResult persistAsync(IAsyncScope scope) {
+    public AsyncTask<PersistenceResult> persistAsync() {
+        return AsyncTask.of(this::persist);
+    }
+    private PersistenceResult persist(IAsyncScope scope) {
         final var playersToPersist = wal.dirtyBanks();
         if (playersToPersist.isEmpty())
             return Success.instance;
@@ -117,7 +124,17 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
     }
 
     @Override
-    public PersistenceResult loadPlayerSnapshotAsync(IAsyncScope scope, UUID playerUUID) {
+    public AsyncTask<PersistenceResult> loadPlayerSnapshotAsync(UUID playerUUID) {
+        return AsyncTask.of(s -> loadPlayerSnapshot(s, playerUUID));
+    }
+
+    private PersistenceResult loadPlayerSnapshot(IAsyncScope scope, UUID playerUUID) {
+        // Existing snapshot is up-to-date
+        final var snapshotAge = bankStoreCache.snapshotAge(playerUUID);
+        if (snapshotAge.map(age -> age.compareTo(snapshotExpiryDuration) < 0).orElse(false)) {
+            return Success.instance;
+        }
+
         try (Connection connection = dataSource.getConnection()) {
             final var playerSnapshotFromDb = getBankSnapshotFromDatabase(connection, playerUUID);
 

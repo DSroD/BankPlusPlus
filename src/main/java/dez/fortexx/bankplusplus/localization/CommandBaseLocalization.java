@@ -2,6 +2,7 @@ package dez.fortexx.bankplusplus.localization;
 
 import de.exlll.configlib.Configuration;
 
+@SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
 @Configuration
 public class CommandBaseLocalization {
     private String commandUsage = "Usage of the command";

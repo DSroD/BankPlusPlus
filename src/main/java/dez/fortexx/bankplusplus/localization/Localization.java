@@ -3,6 +3,7 @@ package dez.fortexx.bankplusplus.localization;
 import de.exlll.configlib.Configuration;
 import dez.fortexx.bankplusplus.configuration.configurator.FromFile;
 
+@SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
 @Configuration
 @FromFile("localization.yml")
 public class Localization {
@@ -19,7 +20,15 @@ public class Localization {
     private String limitViolation = "Transaction violates your bank limit";
     private String upgradeSuccessful = "Bank upgraded successfully";
     private String upgradeFailed = "Could not upgrade bank";
+    private String bankAlreadyMaxLevel = "Bank is already fully upgraded";
+    private String missingRequirements = "Missing requirements for the upgrade";
     private String newBalanceLimitIs = "Your new bank balance limit is";
+    private String balanceLimit = "Maximal balance";
+    private String accountLevelName = "Account level";
+    private String upgradeAvailable = "Upgrade is available";
+    private String nextLevel = "Next level";
+    private String nextLevelBalanceLimit = "Next level balance limit";
+    private String nextLevelRequirements = "Next level requirements";
 
     private String currencySymbol = "$";
     private boolean currencySymbolBeforeNumber = true;
@@ -95,5 +104,37 @@ public class Localization {
 
     public String getNewBalanceLimitIs() {
         return newBalanceLimitIs;
+    }
+
+    public String getBankAlreadyMaxLevel() {
+        return bankAlreadyMaxLevel;
+    }
+
+    public String getMissingRequirements() {
+        return missingRequirements;
+    }
+
+    public String getBalanceLimit() {
+        return balanceLimit;
+    }
+
+    public String getAccountLevelName() {
+        return accountLevelName;
+    }
+
+    public String getNextLevel() {
+        return nextLevel;
+    }
+
+    public String getNextLevelBalanceLimit() {
+        return nextLevelBalanceLimit;
+    }
+
+    public String getNextLevelRequirements() {
+        return nextLevelRequirements;
+    }
+
+    public String getUpgradeAvailable() {
+        return upgradeAvailable;
     }
 }

@@ -2,8 +2,8 @@ package dez.fortexx.bankplusplus.configuration;
 
 import de.exlll.configlib.Comment;
 import de.exlll.configlib.Configuration;
-import dez.fortexx.bankplusplus.api.economy.IBalanceManager;
-import dez.fortexx.bankplusplus.bank.levels.BankLimit;
+import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
+import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.IUpgradeRequirement;
 
 import java.math.BigDecimal;
@@ -20,8 +20,7 @@ public class BankLevelConfig {
             new BigDecimal("100000"), List.of()
     );
 
-    private BankLevelConfig() {
-    }
+    private BankLevelConfig() {}
 
     private BankLevelConfig(BigDecimal moneyLimit, String levelName) {
         this(moneyLimit, levelName, null);
@@ -33,7 +32,7 @@ public class BankLevelConfig {
         this.requirements = upgrades;
     }
 
-    public BankLimit toBankLimit(List<IBalanceManager> balanceManagers) {
+    public BankLimit toBankLimit(List<IEconomyManager> balanceManagers) {
         final Set<IUpgradeRequirement> reqs = (this.requirements == null)
                 ? Set.of()
                 : requirements.toUpgradeRequirementsSet(balanceManagers);

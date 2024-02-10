@@ -1,5 +1,6 @@
 package dez.fortexx.bankplusplus.commands.api;
 
+import dez.fortexx.bankplusplus.commands.api.arguments.validator.IArgumentsValidator;
 import dez.fortexx.bankplusplus.commands.api.result.*;
 import dez.fortexx.bankplusplus.localization.Localization;
 import net.md_5.bungee.api.ChatColor;
@@ -25,8 +26,9 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
     private final String rootCommandName;
     private final BaseComponent[] missingPermissionsComponent;
     private final Localization localization;
+    private final IArgumentsValidator argumentsValidator;
 
-    public CommandDispatcher(String commandName, List<ICommand> subcommands, Localization localization) {
+    public CommandDispatcher(String commandName, List<ICommand> subcommands, Localization localization, IArgumentsValidator argumentsValidator) {
         this.rootCommandName = commandName;
         commands = commandMapFromList(
                 subcommands
@@ -34,6 +36,7 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
         this.localization = localization;
         missingPermissionsComponent = new ComponentBuilder(localization.getCommandBase().getMissingPermission())
                 .color(ChatColor.DARK_RED).create();
+        this.argumentsValidator = argumentsValidator;
     }
 
     public void register(JavaPlugin plugin) {
@@ -68,6 +71,10 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
 
         final var subArgs = Arrays.copyOfRange(args, 1, args.length);
 
+        if (!argumentsValidator.validate(subcommand.getCommandArguments(), subArgs)) {
+            return handleInvalidUsageResult(commandSender, subcommand);
+        }
+
         final var result = subcommand.invoke(commandSender, subArgs);
 
         return handleResult(commandSender, subcommand, result);
@@ -79,15 +86,6 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
             @NotNull ICommandResult result
     ) {
 
-        /*
-        return switch (result) {
-            case SuccessResult succRes -> true;
-            case InvalidCommandSenderResult invComm -> handleInvalidCommandSenderResult(commandSender);
-            case BaseComponentResult bcr -> sendBaseComponent(commandSender, bcr.getComponent());
-            case InvalidUsageResult invUsg -> handleInvalidUsageResult(commandSender, subcommand);
-            case ErrorResult err -> handleErrorResult(commandSender);
-        };
-        */
         if (result instanceof SuccessResult) {
             return true;
         }
@@ -99,6 +97,9 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
         }
         if (result instanceof InvalidUsageResult) {
             return handleInvalidUsageResult(commandSender, subcommand);
+        }
+        if (result instanceof MissingPermissionsResult) {
+            return sendBaseComponent(commandSender, missingPermissionsComponent);
         }
         if (result instanceof ErrorResult) {
             return handleErrorResult(commandSender);
@@ -126,6 +127,7 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
 
     private boolean handleInvalidUsageResult(@NotNull CommandSender commandSender, @NotNull ICommand subcommand) {
         final var cb = new ComponentBuilder(localization.getCommandBase().getInvalidUsage())
+                .color(ChatColor.DARK_RED)
                 .append(":\n");
         appendCommandHelpLine(subcommand, cb);
         final var component = cb.create();

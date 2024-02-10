@@ -1,14 +1,16 @@
 package dez.fortexx.bankplusplus.commands;
 
-import dez.fortexx.bankplusplus.api.economy.IBalanceManager;
-import dez.fortexx.bankplusplus.api.economy.transaction.*;
+import dez.fortexx.bankplusplus.bank.IBankBalanceManager;
+import dez.fortexx.bankplusplus.bank.transaction.*;
 import dez.fortexx.bankplusplus.commands.api.ICommand;
 import dez.fortexx.bankplusplus.commands.api.arguments.BigDecimalArgument;
 import dez.fortexx.bankplusplus.commands.api.arguments.ICommandArgument;
-import dez.fortexx.bankplusplus.commands.api.arguments.validator.IArgumentsValidator;
-import dez.fortexx.bankplusplus.commands.api.result.*;
+import dez.fortexx.bankplusplus.commands.api.result.BaseComponentResult;
+import dez.fortexx.bankplusplus.commands.api.result.ErrorResult;
+import dez.fortexx.bankplusplus.commands.api.result.ICommandResult;
+import dez.fortexx.bankplusplus.commands.api.result.InvalidCommandSenderResult;
 import dez.fortexx.bankplusplus.localization.Localization;
-import dez.fortexx.bankplusplus.utils.ICurrencyFormatter;
+import dez.fortexx.bankplusplus.utils.formatting.ICurrencyFormatter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.command.CommandSender;
@@ -20,21 +22,18 @@ import java.util.Optional;
 
 public class WithdrawCommand implements ICommand {
     private final BigDecimalArgument amountArgument;
-    private final IBalanceManager transactionManager;
+    private final IBankBalanceManager transactionManager;
     private final Localization localization;
-    private final IArgumentsValidator validator;
     private final ICurrencyFormatter currencyFormatter;
 
     public WithdrawCommand(
-            IBalanceManager transactionManager,
+            IBankBalanceManager transactionManager,
             Localization localization,
-            IArgumentsValidator validator,
             ICurrencyFormatter currencyFormatter
     ) {
         this.transactionManager = transactionManager;
         this.localization = localization;
         amountArgument = new BigDecimalArgument(localization.getAmount().toLowerCase());
-        this.validator = validator;
         this.currencyFormatter = currencyFormatter;
     }
 
@@ -45,7 +44,7 @@ public class WithdrawCommand implements ICommand {
 
     @Override
     public @NotNull String getCommandDescription() {
-        return localization.getCommandDescriptions().getWithdraw();
+        return localization.getCommandDescriptions().getWithdrawCommandDescription();
     }
 
     @Override
@@ -58,7 +57,7 @@ public class WithdrawCommand implements ICommand {
     @Override
     public @NotNull Optional<String> getPermission() {
         return Optional.of(
-                "bank.use.withdraw"
+                "bank.use"
         );
     }
 
@@ -72,26 +71,10 @@ public class WithdrawCommand implements ICommand {
     }
 
     private ICommandResult dispatchPlayer(Player p, String[] args) {
-        if (!validator.validate(getCommandArguments(), args))
-            return InvalidUsageResult.instance;
-
         final var amountString = args[0];
 
         final var amount = amountArgument.fromString(amountString);
         final var result = transactionManager.withdraw(p, amount);
-
-        /*
-        return switch (result) {
-            case final SuccessTransactionResult successRes -> successResult(successRes);
-            case InsufficientFundsTransactionResult insuffRes ->
-                    errorResult(localization.getWithdrawFailed() + ". " + localization.getInsufficientFunds());
-            case AmountTooSmallTransactionResult smallRes ->
-                    errorResult(localization.getWithdrawFailed() + ". " + localization.getAmountTooSmall());
-            case LimitsViolationsTransactionResult limViolRes ->
-                    errorResult(localization.getWithdrawFailed() + ". " + localization.getLimitViolation());
-            case DescribedTransactionFailureResult dr -> errorResult(dr.description());
-        };
-        */
 
         if (result instanceof SuccessTransactionResult successRes) {
             return successResult(successRes);

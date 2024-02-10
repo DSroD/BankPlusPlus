@@ -1,7 +1,7 @@
 package dez.fortexx.bankplusplus.configuration;
 
 import de.exlll.configlib.Configuration;
-import dez.fortexx.bankplusplus.api.economy.IBalanceManager;
+import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
 import dez.fortexx.bankplusplus.bank.upgrade.IUpgradeRequirement;
 import dez.fortexx.bankplusplus.bank.upgrade.ItemUpgradeRequirement;
 import dez.fortexx.bankplusplus.bank.upgrade.MoneyUpgradeRequirement;
@@ -33,7 +33,7 @@ public class UpgradeRequirementConfig {
         return new UpgradeRequirementConfig(money, items);
     }
 
-    public Set<IUpgradeRequirement> toUpgradeRequirementsSet(List<IBalanceManager> balanceManagers) {
+    public Set<IUpgradeRequirement> toUpgradeRequirementsSet(List<IEconomyManager> balanceManagers) {
         final var moneyStream = Stream.of(moneyRequired)
                 .filter(Objects::nonNull)
                 .filter(Predicate.not(BigDecimal.ZERO::equals))

@@ -26,4 +26,8 @@ public final class ItemUpgradeRequirement implements IUpgradeRequirement {
         final var didNotRemove = p.getInventory().removeItem(item.clone());
         return (didNotRemove.isEmpty());
     }
+
+    public ItemStack getItem() {
+        return item;
+    }
 }

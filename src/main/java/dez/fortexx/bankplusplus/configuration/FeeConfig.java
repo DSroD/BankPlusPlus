@@ -4,7 +4,7 @@ import de.exlll.configlib.Comment;
 import de.exlll.configlib.Configuration;
 
 import java.math.BigDecimal;
-
+@SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
 @Configuration
 public class FeeConfig {
 

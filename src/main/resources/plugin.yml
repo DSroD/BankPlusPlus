@@ -17,16 +17,6 @@ libraries:
 permissions:
   bank.use:
     default: op
-    children:
-      bank.use.withdraw: true
-      bank.use.deposit: true
-      bank.use.balance: true
-  bank.upgrade.all:
-    default: op
-  bank.interest:
-    default: op
-  bank.interest.offline:
-    default: op
   bank.fees.bypass:
     default: op
     children:

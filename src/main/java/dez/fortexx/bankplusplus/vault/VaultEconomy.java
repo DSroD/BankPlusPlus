@@ -1,17 +1,16 @@
 package dez.fortexx.bankplusplus.vault;
 
-import dez.fortexx.bankplusplus.api.economy.EconomyResult;
-import dez.fortexx.bankplusplus.api.economy.IBalanceManager;
-import dez.fortexx.bankplusplus.api.economy.transaction.DescribedTransactionFailureResult;
-import dez.fortexx.bankplusplus.api.economy.transaction.ITransactionResult;
-import dez.fortexx.bankplusplus.api.economy.transaction.SuccessTransactionResult;
+import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
+import dez.fortexx.bankplusplus.api.economy.result.DescribedFailureEconomyResult;
+import dez.fortexx.bankplusplus.api.economy.result.EconomyResult;
+import dez.fortexx.bankplusplus.api.economy.result.SuccessEconomyResult;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
 
 import java.math.BigDecimal;
 
-public class VaultEconomy implements IBalanceManager {
+public class VaultEconomy implements IEconomyManager {
     private final Economy vaultEconomy;
 
     public VaultEconomy(Economy vaultEconomy) {
@@ -24,20 +23,20 @@ public class VaultEconomy implements IBalanceManager {
     }
 
     @Override
-    public ITransactionResult deposit(OfflinePlayer player, BigDecimal amount) {
+    public EconomyResult deposit(OfflinePlayer player, BigDecimal amount) {
         final var result = vaultEconomy.depositPlayer(player, amount.doubleValue());
         if (result.type == EconomyResponse.ResponseType.SUCCESS)
-            return new SuccessTransactionResult(new BigDecimal(result.amount), BigDecimal.ZERO);
+            return SuccessEconomyResult.instance;
 
-        return new DescribedTransactionFailureResult(result.errorMessage);
+        return new DescribedFailureEconomyResult(result.errorMessage);
     }
 
     @Override
-    public ITransactionResult withdraw(OfflinePlayer player, BigDecimal amount) {
+    public EconomyResult withdraw(OfflinePlayer player, BigDecimal amount) {
         final var result = vaultEconomy.withdrawPlayer(player, amount.doubleValue());
         if (result.type == EconomyResponse.ResponseType.SUCCESS)
-            return new SuccessTransactionResult(new BigDecimal(result.amount), BigDecimal.ZERO);
+            return SuccessEconomyResult.instance;
 
-        return new DescribedTransactionFailureResult(result.errorMessage);
+        return new DescribedFailureEconomyResult(result.errorMessage);
     }
 }

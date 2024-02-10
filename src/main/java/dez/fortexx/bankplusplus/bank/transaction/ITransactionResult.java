@@ -1,0 +1,5 @@
+package dez.fortexx.bankplusplus.bank.transaction;
+
+public sealed interface ITransactionResult permits AmountTooSmallTransactionResult, DescribedTransactionFailureResult, InsufficientFundsTransactionResult, LimitsViolationsTransactionResult, SuccessTransactionResult {
+
+}

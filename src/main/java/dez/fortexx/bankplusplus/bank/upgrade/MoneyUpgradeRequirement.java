@@ -1,17 +1,16 @@
 package dez.fortexx.bankplusplus.bank.upgrade;
 
-import dez.fortexx.bankplusplus.api.economy.IBalanceManager;
+import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-// TODO: unit tests!
 public final class MoneyUpgradeRequirement implements IUpgradeRequirement {
     private final BigDecimal amount;
-    private final List<IBalanceManager> balanceManagers;
+    private final List<IEconomyManager> balanceManagers;
 
-    public MoneyUpgradeRequirement(BigDecimal amount, List<IBalanceManager> balanceManagers) {
+    public MoneyUpgradeRequirement(BigDecimal amount, List<IEconomyManager> balanceManagers) {
         this.amount = amount;
         this.balanceManagers = balanceManagers;
     }
@@ -27,7 +26,7 @@ public final class MoneyUpgradeRequirement implements IUpgradeRequirement {
         return false;
     }
 
-    // TODO: use transaction to avoid the whoopsie
+    // TODO: use transaction to avoid whoopsies
     @Override
     public boolean takeFrom(Player p) {
         var balanceTaken = BigDecimal.ZERO;
@@ -45,5 +44,9 @@ public final class MoneyUpgradeRequirement implements IUpgradeRequirement {
             balanceTaken = balanceTaken.add(balanceAvailable);
         }
         return false;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
     }
 }

@@ -1,98 +1,136 @@
 package dez.fortexx.bankplusplus.bank;
 
 import dez.fortexx.bankplusplus.api.banktransactions.TransactionType;
-import dez.fortexx.bankplusplus.api.economy.IBalanceManager;
-import dez.fortexx.bankplusplus.api.economy.transaction.*;
+import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
+import dez.fortexx.bankplusplus.api.economy.result.DescribedFailureEconomyResult;
+import dez.fortexx.bankplusplus.api.economy.result.FailureEconomyResult;
+import dez.fortexx.bankplusplus.bank.balance.IBankEconomyManager;
 import dez.fortexx.bankplusplus.bank.fees.IFeeProvider;
-import dez.fortexx.bankplusplus.bank.levels.BankLimit;
-import dez.fortexx.bankplusplus.configuration.PluginConfiguration;
-import dez.fortexx.bankplusplus.events.IEventCaller;
+import dez.fortexx.bankplusplus.bank.limits.BankLimit;
+import dez.fortexx.bankplusplus.bank.transaction.*;
+import dez.fortexx.bankplusplus.bank.upgrade.IUpgradeRequirement;
+import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionChecker;
+import dez.fortexx.bankplusplus.bank.upgrade.result.*;
+import dez.fortexx.bankplusplus.events.IEventDispatcher;
 import dez.fortexx.bankplusplus.events.PlayerBankTransactionEvent;
 import dez.fortexx.bankplusplus.events.PlayerBankUpgradeEvent;
-import dez.fortexx.bankplusplus.persistence.IBankStore;
-import org.bukkit.OfflinePlayer;
+import dez.fortexx.bankplusplus.utils.ITransactionRounding;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Optional;
 
-//TODO: unit tests
-public class BankManager implements IBankLimitsManager, IBalanceManager {
+
+/**
+ * Provides transactions between bank account any player account provided using playerBalanceManager
+ */
+public class BankManager implements IBankManager {
     @Unmodifiable
     private final List<BankLimit> bankLimits;
-    private final IBalanceManager playerBalanceManager;
-    private final IBankStore bankStore;
+    private final IEconomyManager playerBalanceManager;
+    private final IBankEconomyManager bankEconomyManager;
     private final IFeeProvider feeProvider;
-    private final IEventCaller eventCaller;
-    private final PluginConfiguration configuration;
+    private final IEventDispatcher eventDispatcher;
+    private final IUpgradePermissionChecker upgradePermissionChecker;
+    private final ITransactionRounding rounding;
 
     public BankManager(
-            Function<IBalanceManager, @Unmodifiable List<BankLimit>> bankLevelSupplier,
-            IBalanceManager playerBalanceManager,
-            IBankStore bankStore, IFeeProvider feeProvider,
-            IEventCaller eventCaller,
-            PluginConfiguration configuration
+            @Unmodifiable List<BankLimit> limits,
+            IEconomyManager playerBalanceManager,
+            IBankEconomyManager bankEconomyManager,
+            IUpgradePermissionChecker upgradePermissionChecker,
+            IFeeProvider feeProvider,
+            IEventDispatcher eventDispatcher,
+            ITransactionRounding rounding
     ) {
-        this.bankLimits = bankLevelSupplier.apply(this);
+        this.bankLimits = limits;
         this.playerBalanceManager = playerBalanceManager;
-        this.bankStore = bankStore;
+        this.bankEconomyManager = bankEconomyManager;
         this.feeProvider = feeProvider;
-        this.eventCaller = eventCaller;
-        this.configuration = configuration;
+        this.eventDispatcher = eventDispatcher;
+        this.rounding = rounding;
+        this.upgradePermissionChecker = upgradePermissionChecker;
     }
 
     @Override
-    public boolean upgradeLimits(Player player) {
+    public IUpgradeResult upgradeLimits(Player player) {
         // Level nubmer is level index + 1
-        final var currentLevelNumber = bankStore.getBankLevel(player.getUniqueId());
+        final var currentLevelNumber = bankEconomyManager.getBankLevel(player);
         // Can not upgrade
         if (currentLevelNumber >= bankLimits.size())
-            return false;
+            return MaxLevelUpgradeResult.instance;
 
-        final var bankUpgradeRequirements = bankLimits.get(currentLevelNumber) // This is the next level in the array
+        // currentLevelNumber is actually index of the next level!
+        final var nextLevel = bankLimits.get(currentLevelNumber);
+
+        if (!upgradePermissionChecker.canUpgrade(player, nextLevel)) {
+            return MissingPermissionsUpgradeResult.instance;
+        }
+
+        final var bankUpgradeRequirements = nextLevel
                 .upgradeRequirements();
 
+        final var missingRequirements = new LinkedList<IUpgradeRequirement>();
         for (final var requirement : bankUpgradeRequirements) {
             // Only check before taking
             if (!requirement.has(player)) {
-                return false;
+                missingRequirements.add(requirement);
             }
+        }
+
+        if (!missingRequirements.isEmpty()) {
+            return new MissingRequirementsUpgradeResult(missingRequirements);
         }
 
         for (final var requirement : bankUpgradeRequirements) {
             // Requirements OK - take
             if (!requirement.takeFrom(player))
-                // If unable to take the requirement - cancel all - already taken stuff is deleted
                 // TODO: transactional approach
-                return false;
+                // If unable to take the requirement - cancel all - already taken stuff is gone
+                return new MissingRequirementsUpgradeResult(List.of(requirement));
         }
 
         final var newLevel = currentLevelNumber + 1;
-        bankStore.upgradeLevel(player.getUniqueId());
-        eventCaller.call(new PlayerBankUpgradeEvent(player, newLevel));
-        return true;
+        bankEconomyManager.upgradeLevel(player);
+        eventDispatcher.dispatch(new PlayerBankUpgradeEvent(player, newLevel));
+        return SuccessUpgradeResult.instance;
     }
 
     @Override
     public BankLimit getLimit(Player player) {
-        final var levelIdx = bankStore.getBankLevel(player.getUniqueId()) - 1;
+        final var levelIdx = bankEconomyManager.getBankLevel(player) - 1;
         return bankLimits.get(levelIdx);
     }
 
     @Override
-    public ITransactionResult deposit(OfflinePlayer player, BigDecimal amount) {
-        final var playerUUID = player.getUniqueId();
-        final var currentBankBalance = bankStore.getBankFunds(playerUUID);
+    public Optional<BankLimit> getNextLevelLimit(Player player) {
+        final var nextLevelIdx = bankEconomyManager.getBankLevel(player);
+        if (nextLevelIdx >= bankLimits.size()) { // We are at the maximum level
+            return Optional.empty();
+        }
 
-        final var roundedAmount = amount.setScale(configuration.getDecimalPrecision(), RoundingMode.CEILING);
+        final var nextBankLimit = bankLimits.get(nextLevelIdx);
+
+        if (!upgradePermissionChecker.canUpgrade(player, nextBankLimit)) {
+            return Optional.empty();
+        }
+
+        return Optional.of(nextBankLimit);
+    }
+
+    @Override
+    public ITransactionResult deposit(Player player, BigDecimal amount) {
+        final var currentBankBalance = bankEconomyManager.getBalance(player);
+
+        final var roundedAmount = rounding.round(amount);
 
         final var currentPlayerBalance = playerBalanceManager.getBalance(player);
 
         if (currentPlayerBalance.compareTo(roundedAmount) < 0) {
-            return InsufficientFundsTransactionResult.instance;
+            return new InsufficientFundsTransactionResult(currentPlayerBalance);
         }
 
         final var fee = feeProvider.getDepositFee(player, roundedAmount);
@@ -101,8 +139,9 @@ public class BankManager implements IBankLimitsManager, IBalanceManager {
         if (depositedAmount.compareTo(BigDecimal.ZERO) <= 0)
             return AmountTooSmallTransactionResult.instance;
 
-        var bankLevel = bankStore.getBankLevel(playerUUID);
-        if (bankLevel >= bankLimits.size()) {
+        var bankLevel = bankEconomyManager.getBankLevel(player);
+        if (bankLevel > bankLimits.size()) {
+            // TODO: handle fallback somehow better
             bankLevel = 1;
         }
         final var bankIdx = bankLevel - 1;
@@ -114,12 +153,16 @@ public class BankManager implements IBankLimitsManager, IBalanceManager {
 
         // TODO: transactions
         final var takeFromPlayerResult = playerBalanceManager.withdraw(player, roundedAmount);
-        if (!(takeFromPlayerResult instanceof SuccessTransactionResult)) {
-            return takeFromPlayerResult;
+        if (takeFromPlayerResult instanceof DescribedFailureEconomyResult e) {
+            return new DescribedTransactionFailureResult(e.description());
+        }
+        if (takeFromPlayerResult instanceof FailureEconomyResult) {
+            // TODO: better representation
+            return new DescribedTransactionFailureResult("Failure removing money from player");
         }
 
-        bankStore.addBankFunds(playerUUID, depositedAmount);
-        eventCaller.call(
+        bankEconomyManager.deposit(player, depositedAmount);
+        eventDispatcher.dispatch(
                 new PlayerBankTransactionEvent(player, depositedAmount, fee, TransactionType.DEPOSIT)
         );
         return new SuccessTransactionResult(
@@ -129,11 +172,10 @@ public class BankManager implements IBankLimitsManager, IBalanceManager {
     }
 
     @Override
-    public ITransactionResult withdraw(OfflinePlayer player, BigDecimal amount) {
-        final var playerUUID = player.getUniqueId();
-        final var currentBankBalance = bankStore.getBankFunds(playerUUID);
+    public ITransactionResult withdraw(Player player, BigDecimal amount) {
+        final var currentBankBalance = bankEconomyManager.getBalance(player);
 
-        final var roundedAmount = amount.setScale(configuration.getDecimalPrecision(), RoundingMode.CEILING);
+        final var roundedAmount = rounding.round(amount);
 
         if (roundedAmount.compareTo(BigDecimal.ZERO) <= 0)
             return AmountTooSmallTransactionResult.instance;
@@ -142,27 +184,34 @@ public class BankManager implements IBankLimitsManager, IBalanceManager {
         final var takenAmount = roundedAmount.add(fee);
 
         if (currentBankBalance.compareTo(takenAmount) < 0) {
-            return InsufficientFundsTransactionResult.instance;
+            final var maximalPossibleWithdraw = feeProvider.getMaximalWithdraw(player, currentBankBalance);
+            return new InsufficientFundsTransactionResult(maximalPossibleWithdraw);
         }
 
         // TODO: transactions
-        if (!bankStore.takeBankFunds(playerUUID, takenAmount)) {
+        final var withdrawResult = bankEconomyManager.withdraw(player, takenAmount);
+
+        if (withdrawResult instanceof FailureEconomyResult) {
             // TODO: use different message-independent class
             return new DescribedTransactionFailureResult("Failed to take money from the bank.");
         }
+        if (withdrawResult instanceof DescribedFailureEconomyResult e) {
+            return new DescribedTransactionFailureResult(e.description());
+        }
+
         playerBalanceManager.deposit(player, roundedAmount);
-        eventCaller.call(
+        eventDispatcher.dispatch(
                 new PlayerBankTransactionEvent(player, takenAmount, fee, TransactionType.WITHDRAW)
         );
 
         return new SuccessTransactionResult(
-                currentBankBalance.subtract(amount),
+                currentBankBalance.subtract(takenAmount),
                 fee
         );
     }
 
     @Override
-    public BigDecimal getBalance(OfflinePlayer p) {
-        return bankStore.getBankFunds(p.getUniqueId());
+    public BigDecimal getBalance(Player p) {
+        return bankEconomyManager.getBalance(p);
     }
 }

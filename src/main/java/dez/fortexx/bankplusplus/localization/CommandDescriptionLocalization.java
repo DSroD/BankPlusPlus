@@ -2,25 +2,31 @@ package dez.fortexx.bankplusplus.localization;
 
 import de.exlll.configlib.Configuration;
 
+@SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
 @Configuration
 public class CommandDescriptionLocalization {
     private String withdraw = "withdraws money from the bank";
     private String deposit = "deposits money to the bank";
     private String balance = "get account balance";
     private String upgrade = "upgrade bank account";
-    public String getWithdraw() {
+    private String info = "bank account info";
+    public String getWithdrawCommandDescription() {
         return withdraw;
     }
 
-    public String getDeposit() {
+    public String getDepositCommandDescription() {
         return deposit;
     }
 
-    public String getBalance() {
+    public String getBalanceCommandDescription() {
         return balance;
     }
 
-    public String getUpgrade() {
+    public String getUpgradeCommandDescription() {
         return upgrade;
+    }
+
+    public String getInfoCommandDescription() {
+        return info;
     }
 }

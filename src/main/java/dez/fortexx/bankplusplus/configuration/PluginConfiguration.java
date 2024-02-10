@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import java.math.BigDecimal;
 import java.util.List;
 
+@SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
 @Configuration
 @FromFile("config.yml")
 public class PluginConfiguration {
@@ -17,6 +18,8 @@ public class PluginConfiguration {
         private FeeConfig fees = new FeeConfig();
         @Comment("Decimal precision of computations")
         private int decimalPrecision = 2;
+        @Comment("Minimal level of logs to show")
+        private LogLevel logLevel = LogLevel.WARNING;
         @Comment("Bank levels")
         private List<BankLevelConfig> bankLevels = List.of(
                 BankLevelConfig.of(new BigDecimal("50000"), "Level 1"),
@@ -46,5 +49,9 @@ public class PluginConfiguration {
 
         public List<BankLevelConfig> getBankLevels() {
                 return bankLevels;
+        }
+
+        public LogLevel getLogLevel() {
+                return logLevel;
         }
 }

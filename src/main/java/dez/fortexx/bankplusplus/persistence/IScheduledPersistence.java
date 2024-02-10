@@ -1,11 +1,11 @@
 package dez.fortexx.bankplusplus.persistence;
 
-import dez.fortexx.bankplusplus.async.IAsyncScope;
-import dez.fortexx.bankplusplus.persistence.utils.PersistenceResult;
+import dez.fortexx.bankplusplus.async.AsyncTask;
+import dez.fortexx.bankplusplus.persistence.api.PersistenceResult;
 
 import java.util.UUID;
 
 public interface IScheduledPersistence {
-    PersistenceResult persistAsync(IAsyncScope scope);
-    PersistenceResult loadPlayerSnapshotAsync(IAsyncScope scope, UUID uuid);
+    AsyncTask<PersistenceResult> persistAsync();
+    AsyncTask<PersistenceResult> loadPlayerSnapshotAsync(UUID uuid);
 }
