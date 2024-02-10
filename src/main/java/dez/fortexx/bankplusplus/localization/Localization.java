@@ -16,6 +16,7 @@ public class Localization {
     private String withdrawSuccessful = "Successfully taken money from the bank";
     private String withdrawFailed = "Failed to withdraw money from the bank";
     private String insufficientFunds = "Insufficient funds";
+    private String maximumWithdrawalPossible = "Maximal withdrawal possible";
     private String amountTooSmall = "Transaction amount too small";
     private String limitViolation = "Transaction violates your bank limit";
     private String upgradeSuccessful = "Bank upgraded successfully";
@@ -136,5 +137,9 @@ public class Localization {
 
     public String getUpgradeAvailable() {
         return upgradeAvailable;
+    }
+
+    public String getMaximumWithdrawalPossible() {
+        return maximumWithdrawalPossible;
     }
 }

@@ -79,8 +79,8 @@ public class WithdrawCommand implements ICommand {
         if (result instanceof SuccessTransactionResult successRes) {
             return successResult(successRes);
         }
-        if (result instanceof InsufficientFundsTransactionResult) {
-            return errorResult(localization.getWithdrawFailed() + ". " + localization.getInsufficientFunds());
+        if (result instanceof InsufficientFundsTransactionResult i) {
+            return insufficientFundsResult(i);
         }
         if (result instanceof AmountTooSmallTransactionResult) {
             return errorResult(localization.getWithdrawFailed() + ". " + localization.getAmountTooSmall());
@@ -120,6 +120,20 @@ public class WithdrawCommand implements ICommand {
         final var component = new ComponentBuilder(text)
                 .color(ChatColor.RED).bold(true)
                 .create();
+        return new BaseComponentResult(component);
+    }
+
+    private BaseComponentResult insufficientFundsResult(InsufficientFundsTransactionResult res) {
+        final var component = new ComponentBuilder(localization.getWithdrawFailed())
+                .color(ChatColor.RED).bold(true)
+                .append(". ")
+                .append(localization.getInsufficientFunds())
+                .append(". ")
+                .append(localization.getMaximumWithdrawalPossible())
+                .append(": ")
+                .append(currencyFormatter.formatCurrency(res.maximalTransactionAmountAllowed()))
+                .create();
+
         return new BaseComponentResult(component);
     }
 }
