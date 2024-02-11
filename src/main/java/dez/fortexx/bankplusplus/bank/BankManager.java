@@ -9,11 +9,12 @@ import dez.fortexx.bankplusplus.bank.fees.IFeeProvider;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.transaction.*;
 import dez.fortexx.bankplusplus.bank.upgrade.IUpgradeRequirement;
-import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionChecker;
+import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;
 import dez.fortexx.bankplusplus.bank.upgrade.result.*;
 import dez.fortexx.bankplusplus.events.IEventDispatcher;
 import dez.fortexx.bankplusplus.events.PlayerBankTransactionEvent;
 import dez.fortexx.bankplusplus.events.PlayerBankUpgradeEvent;
+import dez.fortexx.bankplusplus.logging.ILogger;
 import dez.fortexx.bankplusplus.utils.ITransactionRounding;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Unmodifiable;
@@ -34,17 +35,18 @@ public class BankManager implements IBankManager {
     private final IBankEconomyManager bankEconomyManager;
     private final IFeeProvider feeProvider;
     private final IEventDispatcher eventDispatcher;
-    private final IUpgradePermissionChecker upgradePermissionChecker;
+    private final IUpgradePermissionManager upgradePermissionChecker;
     private final ITransactionRounding rounding;
+    private final ILogger logger;
 
     public BankManager(
             @Unmodifiable List<BankLimit> limits,
             IEconomyManager playerBalanceManager,
             IBankEconomyManager bankEconomyManager,
-            IUpgradePermissionChecker upgradePermissionChecker,
+            IUpgradePermissionManager upgradePermissionChecker,
             IFeeProvider feeProvider,
             IEventDispatcher eventDispatcher,
-            ITransactionRounding rounding
+            ITransactionRounding rounding, ILogger logger
     ) {
         this.bankLimits = limits;
         this.playerBalanceManager = playerBalanceManager;
@@ -53,6 +55,7 @@ public class BankManager implements IBankManager {
         this.eventDispatcher = eventDispatcher;
         this.rounding = rounding;
         this.upgradePermissionChecker = upgradePermissionChecker;
+        this.logger = logger;
     }
 
     @Override
@@ -95,7 +98,12 @@ public class BankManager implements IBankManager {
 
         final var newLevel = currentLevelNumber + 1;
         bankEconomyManager.upgradeLevel(player);
+
         eventDispatcher.dispatch(new PlayerBankUpgradeEvent(player, newLevel));
+        logger.info(
+                () -> "[Upgrade] " + player.getName() + " upgraded bank to level " + newLevel
+        );
+
         return SuccessUpgradeResult.instance;
     }
 
@@ -162,9 +170,16 @@ public class BankManager implements IBankManager {
         }
 
         bankEconomyManager.deposit(player, depositedAmount);
+
+
         eventDispatcher.dispatch(
                 new PlayerBankTransactionEvent(player, depositedAmount, fee, TransactionType.DEPOSIT)
         );
+
+        logger.info(
+                () -> "[Deposit] " + player.getName() + " deposited " + depositedAmount.toPlainString() + " to the bank + paid fee of " + fee.toPlainString()
+        );
+
         return new SuccessTransactionResult(
                 finalBalance,
                 fee
@@ -200,8 +215,13 @@ public class BankManager implements IBankManager {
         }
 
         playerBalanceManager.deposit(player, roundedAmount);
+
         eventDispatcher.dispatch(
-                new PlayerBankTransactionEvent(player, takenAmount, fee, TransactionType.WITHDRAW)
+                new PlayerBankTransactionEvent(player, roundedAmount, fee, TransactionType.WITHDRAW)
+        );
+
+        logger.info(
+                () -> "[Withdraw] " + player.getName() + " withdrawn " + roundedAmount.toPlainString() + " from the bank + paid fee of " + fee.toPlainString()
         );
 
         return new SuccessTransactionResult(

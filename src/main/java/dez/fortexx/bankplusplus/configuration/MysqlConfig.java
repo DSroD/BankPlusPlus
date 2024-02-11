@@ -10,6 +10,7 @@ public class MysqlConfig {
         private String database = "banks";
         private String username = "root";
         private String password = "";
+        private String tableName = "bankplusplus";
 
         public String getHost() {
                 return host;
@@ -29,5 +30,9 @@ public class MysqlConfig {
 
         public String getPassword() {
                 return password;
+        }
+
+        public String getTableName() {
+                return tableName;
         }
 }

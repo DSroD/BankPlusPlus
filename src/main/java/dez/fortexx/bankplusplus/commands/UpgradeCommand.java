@@ -59,7 +59,7 @@ public class UpgradeCommand implements ICommand {
 
     @Override
     public @NotNull Optional<String> getPermission() {
-        return Optional.of("bank.use");
+        return Optional.of("bankplusplus");
     }
 
     @Override

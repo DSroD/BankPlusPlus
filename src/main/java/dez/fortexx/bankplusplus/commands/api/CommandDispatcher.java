@@ -159,8 +159,8 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
     }
 
     private ComponentBuilder appendCommandHelpLine(final ICommand c, final ComponentBuilder cb) {
-        cb.color(ChatColor.GOLD).bold(true)
-                .append("/")
+        cb.append("/")
+                .color(ChatColor.GOLD).bold(true)
                 .append(rootCommandName)
                 .append(" ")
                 .append(c.getCommandName())

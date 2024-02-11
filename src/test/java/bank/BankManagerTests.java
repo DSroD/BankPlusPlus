@@ -13,7 +13,7 @@ import dez.fortexx.bankplusplus.bank.transaction.InsufficientFundsTransactionRes
 import dez.fortexx.bankplusplus.bank.transaction.LimitsViolationsTransactionResult;
 import dez.fortexx.bankplusplus.bank.transaction.SuccessTransactionResult;
 import dez.fortexx.bankplusplus.bank.upgrade.MoneyUpgradeRequirement;
-import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionChecker;
+import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;
 import dez.fortexx.bankplusplus.bank.upgrade.result.MaxLevelUpgradeResult;
 import dez.fortexx.bankplusplus.bank.upgrade.result.MissingPermissionsUpgradeResult;
 import dez.fortexx.bankplusplus.bank.upgrade.result.MissingRequirementsUpgradeResult;
@@ -23,6 +23,7 @@ import dez.fortexx.bankplusplus.configuration.UpgradeRequirementConfig;
 import dez.fortexx.bankplusplus.events.IEventDispatcher;
 import dez.fortexx.bankplusplus.events.PlayerBankTransactionEvent;
 import dez.fortexx.bankplusplus.utils.ITransactionRounding;
+import mock.LoggerMock;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -55,10 +56,11 @@ public class BankManagerTests {
                 createLimits(List.of(otherEconomy, bankEconomy)),
                 otherEconomy,
                 bankEconomy,
-                new UpgradePermissionCheckerMock(true),
+                new UpgradePermissionManagerMock(true),
                 new FeeProviderMock(BigDecimal.ONE),
                 eventDispatcherMock,
-                rounding
+                rounding,
+                new LoggerMock()
         );
     }
 
@@ -245,10 +247,11 @@ public class BankManagerTests {
                 createLimits(List.of(otherEconomy, bankEconomy)),
                 otherEconomy,
                 bankEconomy,
-                new UpgradePermissionCheckerMock(false),
+                new UpgradePermissionManagerMock(false),
                 new FeeProviderMock(BigDecimal.ONE),
                 eventDispatcherMock,
-                rounding
+                rounding,
+                new LoggerMock()
         );
 
         bankEconomy.deposit(null, BigDecimal.TEN);
@@ -292,7 +295,7 @@ public class BankManagerTests {
         }
     }
 
-    private record UpgradePermissionCheckerMock(boolean canUpgrade) implements IUpgradePermissionChecker {
+    private record UpgradePermissionManagerMock(boolean canUpgrade) implements IUpgradePermissionManager {
 
         @Override
             public boolean canUpgrade(Player p, BankLimit limit) {
@@ -300,7 +303,7 @@ public class BankManagerTests {
             }
 
             @Override
-            public String getLimitPermissionSubNode(BankLimit limit) {
+            public String getLimitPermissionNode(BankLimit limit) {
                 return null;
             }
 

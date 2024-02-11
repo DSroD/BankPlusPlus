@@ -17,27 +17,29 @@ Just drop the JAR from artifacts (TODO - github actions) into plugins folder in 
 
 ### Commands
 
-| Command                   | Permission required                        | Description                                 |
-|---------------------------|--------------------------------------------|---------------------------------------------|
-| `/bank info`              | bank.use                                   | Information about bank account and upgrades |
-| `/bank balance`           | bank.use                                   | Balance of the bank account                 |
-| `/bank deposit [amount]`  | bank.use                                   | Deposit give amount to the bank             |
-| `/bank withdraw [amount]` | bank.use                                   | Withdraws given amount from the bank        |
-| `/bank upgrade`           | bank.use + see [Permissions](#permissions) | Upgrades bank level                         |
+| Command                   | Permission required                                | Description                                 |
+|---------------------------|----------------------------------------------------|---------------------------------------------|
+| `/bank info`              | bankplusplus.use                                   | Information about bank account and upgrades |
+| `/bank balance`           | bankplusplus.use                                   | Balance of the bank account                 |
+| `/bank deposit [amount]`  | bankplusplus.use                                   | Deposit give amount to the bank             |
+| `/bank withdraw [amount]` | bankplusplus.use                                   | Withdraws given amount from the bank        |
+| `/bank upgrade`           | bankplusplus.use + see [Permissions](#permissions) | Upgrades bank level                         |
 
 ### Permissions
 
-| Permission                  | Description                                          |
-|-----------------------------|------------------------------------------------------|
-| `bank.use`                  | Allows usage of all basic commands                   |
-| `bank.fees.bypass`          | User ignores deposit/withdraw fee                    |
-| `bank.upgrade.[level_name]` | Allows user to upgrade bank to the specified level   |
+| Permission                          | Description                                        |
+|-------------------------------------|----------------------------------------------------|
+| `bankplusplus.use`                  | Allows usage of all basic commands                 |
+| `bankplusplus.fees.bypass`          | User ignores deposit and withdraw fee              |
+| `bankplusplus.fees.bypass.deposit`  | User ignores deposit fee                           |
+| `bankplusplus.fees.bypass.withdraw` | User ignores withdraw fee                          |
+| `bankplusplus.upgrade.[level_name]` | Allows user to upgrade bank to the specified level |
 
 #### Notes:
 
 - `bank.upgrade.[level_name]` permission is available for all levels except the first level
   (first bank level in the list in configuration)
-- *level_name* in `bank.upgrade.[level_name]` is always lowercase, spaces are replaced with underscore (`_`)
+- *level_name* in `bankplusplus.upgrade.[level_name]` is always lowercase, spaces are replaced with underscore (`_`)
 
 ### Bank fees
 

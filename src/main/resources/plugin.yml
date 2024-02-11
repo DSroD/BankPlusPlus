@@ -15,10 +15,10 @@ libraries:
   - org.snakeyaml:snakeyaml-engine:2.7
 
 permissions:
-  bank.use:
+  bankplusplus.use:
     default: op
-  bank.fees.bypass:
+  bankplusplus.fees.bypass:
     default: op
     children:
-      bank.fees.bypass.deposit: true
-      bank.fees.bypass.withdraw: true
+      bankplusplus.fees.bypass.deposit: true
+      bankplusplus.fees.bypass.withdraw: true

@@ -50,7 +50,7 @@ public class BalanceCommand implements ICommand {
     @Override
     public @NotNull Optional<String> getPermission() {
         return Optional.of(
-                "bank.use"
+                "bankplusplus.use"
         );
     }
 

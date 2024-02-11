@@ -39,7 +39,8 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
     public HikariBankStore(
             IBankStoreCache bankStoreCache,
             IBankStoreWAL wal,
-            HikariBankStoreConfig config, Duration snapshotExpiryDuration
+            HikariBankStoreConfig config,
+            Duration snapshotExpiryDuration
     ) {
         this.bankStoreCache = bankStoreCache;
         this.wal = wal;
@@ -49,9 +50,7 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
         dataSource.setJdbcUrl(config.jdbcUrl());
         dataSource.setUsername(config.username());
         dataSource.setPassword(config.password());
-
-        // TODO: from config
-        tableName = "bank";
+        tableName = config.tableName();
 
         //TODO: config data source
     }

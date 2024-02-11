@@ -25,7 +25,7 @@ public class PercentageFeeProvider implements IFeeProvider {
     @Override
     public BigDecimal getDepositFee(OfflinePlayer player, BigDecimal amount) {
         final var p = player.getPlayer();
-        if (p != null && p.hasPermission("bank.fees.bypass.deposit")) {
+        if (p != null && p.hasPermission("bankplusplus.fees.bypass.deposit")) {
             return BigDecimal.ZERO;
         }
         return rounding.round(amount.multiply(depositFeePercentage));
@@ -34,7 +34,7 @@ public class PercentageFeeProvider implements IFeeProvider {
     @Override
     public BigDecimal getWithdrawFee(OfflinePlayer player, BigDecimal amount) {
         final var p = player.getPlayer();
-        if (p != null && p.hasPermission("bank.fees.bypass.withdraw")) {
+        if (p != null && p.hasPermission("bankplusplus.fees.bypass.withdraw")) {
             return BigDecimal.ZERO;
         }
         return rounding.round(amount.multiply(withdrawFeePercentage));
@@ -43,7 +43,7 @@ public class PercentageFeeProvider implements IFeeProvider {
     @Override
     public BigDecimal getMaximalWithdraw(OfflinePlayer player, BigDecimal accountBalance) {
         final var p = player.getPlayer();
-        if (p != null && p.hasPermission("bank.fees.bypass.withdraw")) {
+        if (p != null && p.hasPermission("bankplusplus.fees.bypass.withdraw")) {
             return accountBalance;
         }
         // Withdraw is total_taken = asked_for + asked_for * fee_percentage

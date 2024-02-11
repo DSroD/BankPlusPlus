@@ -5,7 +5,8 @@ import dez.fortexx.bankplusplus.bank.BankManager;
 import dez.fortexx.bankplusplus.bank.balance.BankEconomyManager;
 import dez.fortexx.bankplusplus.bank.fees.PercentageFeeProvider;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
-import dez.fortexx.bankplusplus.bank.upgrade.permissions.UpgradePermissionChecker;
+import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;
+import dez.fortexx.bankplusplus.bank.upgrade.permissions.UpgradePermissionManager;
 import dez.fortexx.bankplusplus.commands.*;
 import dez.fortexx.bankplusplus.commands.api.CommandDispatcher;
 import dez.fortexx.bankplusplus.commands.api.arguments.validator.BasicValidator;
@@ -118,7 +119,8 @@ public final class BankPlusPlus extends JavaPlugin {
                 balanceManager,
                 bankEconomyManager
         );
-        final var bankUpgradePermissionChecker = new UpgradePermissionChecker();
+        final var upgradePermissionNode = "bankplusplus.upgrade";
+        final var bankUpgradePermissionChecker = new UpgradePermissionManager(upgradePermissionNode);
 
         final var bankLevels = config.getBankLevels()
                 .stream()
@@ -126,14 +128,12 @@ public final class BankPlusPlus extends JavaPlugin {
                 .toList();
 
         // Register upgrade permission node for each level (except the first one) of bank
-        bankLevels.stream().skip(1).map(BankLimit::name)
-                .forEach(
-                        registerPermissionNode(
-                                "bank.upgrade",
-                                '_',
-                                "Allows to upgrade to this bank level"
-                        )
-                );
+        final var registerUpgradeNode = registerUpgradePermissionNode(
+                "Allows to upgrade to this bank level",
+                bankUpgradePermissionChecker
+        );
+        bankLevels.stream().skip(1)
+                .forEach(registerUpgradeNode);
 
         final var bankManager = new BankManager(
                 bankLevels,
@@ -142,7 +142,8 @@ public final class BankPlusPlus extends JavaPlugin {
                 bankUpgradePermissionChecker,
                 taxProvider,
                 eventCaller,
-                rounding
+                rounding,
+                logger
         );
 
         /*
@@ -170,7 +171,7 @@ public final class BankPlusPlus extends JavaPlugin {
                 bankStore.persistAsync().then(
                         (scope, result) -> {
                             if (result instanceof Failure f) {
-                                scope.runSync(() -> this.getLogger().warning(f.message()));
+                                scope.runSync(() -> logger.warn(f.message()));
                             }
                         }
                 ),
@@ -210,10 +211,10 @@ public final class BankPlusPlus extends JavaPlugin {
         return rsp.getProvider();
     }
 
-    private Consumer<String> registerPermissionNode(String parentNode, Character separator, String description) {
+    private Consumer<BankLimit> registerUpgradePermissionNode(String description, IUpgradePermissionManager permissionChecker) {
         return (s) -> {
             final var permission = new Permission(
-                    parentNode + "." + s.replace(' ', separator),
+                    permissionChecker.getLimitPermissionNode(s),
                     description,
                     PermissionDefault.OP
             );
