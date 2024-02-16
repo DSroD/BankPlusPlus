@@ -22,6 +22,7 @@ import dez.fortexx.bankplusplus.persistence.hikari.HikariBankStore;
 import dez.fortexx.bankplusplus.persistence.hikari.HikariBankStoreConfig;
 import dez.fortexx.bankplusplus.persistence.api.Failure;
 import dez.fortexx.bankplusplus.persistence.wal.BankStoreWAL;
+import dez.fortexx.bankplusplus.placeholders.BankPlusPlusPlaceholderExpansion;
 import dez.fortexx.bankplusplus.scheduler.BukkitScheduler;
 import dez.fortexx.bankplusplus.scheduler.IScheduler;
 import dez.fortexx.bankplusplus.utils.ITransactionRounding;
@@ -124,7 +125,7 @@ public final class BankPlusPlus extends JavaPlugin {
 
         final var bankLevels = config.getBankLevels()
                 .stream()
-                .map(level -> level.toBankLimit(economyManagers))
+                .map(level -> level.toBankLimit(economyManagers, rounding))
                 .toList();
 
         // Register upgrade permission node for each level (except the first one) of bank
@@ -178,6 +179,14 @@ public final class BankPlusPlus extends JavaPlugin {
                 Duration.ofSeconds(30),
                 Duration.ofSeconds(30)
         );
+
+        /*
+         * Placeholder API
+         */
+        if (this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            final var expansion = new BankPlusPlusPlaceholderExpansion(this, bankStore, currencyFormatter);
+            expansion.register();
+        }
     }
 
     @NotNull

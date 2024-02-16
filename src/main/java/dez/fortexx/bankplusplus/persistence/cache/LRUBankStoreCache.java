@@ -29,8 +29,8 @@ public class LRUBankStoreCache implements IBankStoreCache {
     }
 
     @Override
-    public IPlayerBankSnapshot getSnapshot(UUID playerUUID) {
-        return snapshots.get(playerUUID);
+    public Optional<IPlayerBankSnapshot> getSnapshot(UUID playerUUID) {
+        return Optional.ofNullable(snapshots.get(playerUUID));
     }
 
     @Override

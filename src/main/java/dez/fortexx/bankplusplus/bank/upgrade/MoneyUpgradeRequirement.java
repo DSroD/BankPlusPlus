@@ -1,6 +1,7 @@
 package dez.fortexx.bankplusplus.bank.upgrade;
 
 import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
+import dez.fortexx.bankplusplus.utils.ITransactionRounding;
 import org.bukkit.entity.Player;
 
 import java.math.BigDecimal;
@@ -8,10 +9,16 @@ import java.util.List;
 
 public final class MoneyUpgradeRequirement implements IUpgradeRequirement {
     private final BigDecimal amount;
+    private final ITransactionRounding rounding;
     private final List<IEconomyManager> balanceManagers;
 
-    public MoneyUpgradeRequirement(BigDecimal amount, List<IEconomyManager> balanceManagers) {
+    public MoneyUpgradeRequirement(
+            BigDecimal amount,
+            ITransactionRounding rounding,
+            List<IEconomyManager> balanceManagers
+    ) {
         this.amount = amount;
+        this.rounding = rounding;
         this.balanceManagers = balanceManagers;
     }
 
@@ -41,7 +48,9 @@ public final class MoneyUpgradeRequirement implements IUpgradeRequirement {
             }
 
             balanceManager.withdraw(p, balanceAvailable);
-            balanceTaken = balanceTaken.add(balanceAvailable);
+            // This might cause a tiny error in calculation, but it will
+            // keep the amounts taken nice
+            balanceTaken = rounding.round(balanceTaken.add(balanceAvailable));
         }
         return false;
     }

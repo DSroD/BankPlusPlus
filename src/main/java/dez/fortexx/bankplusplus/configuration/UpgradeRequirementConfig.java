@@ -5,6 +5,7 @@ import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
 import dez.fortexx.bankplusplus.bank.upgrade.IUpgradeRequirement;
 import dez.fortexx.bankplusplus.bank.upgrade.ItemUpgradeRequirement;
 import dez.fortexx.bankplusplus.bank.upgrade.MoneyUpgradeRequirement;
+import dez.fortexx.bankplusplus.utils.ITransactionRounding;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,11 +34,14 @@ public class UpgradeRequirementConfig {
         return new UpgradeRequirementConfig(money, items);
     }
 
-    public Set<IUpgradeRequirement> toUpgradeRequirementsSet(List<IEconomyManager> balanceManagers) {
+    public Set<IUpgradeRequirement> toUpgradeRequirementsSet(
+            List<IEconomyManager> balanceManagers,
+            ITransactionRounding rounding
+    ) {
         final var moneyStream = Stream.of(moneyRequired)
                 .filter(Objects::nonNull)
                 .filter(Predicate.not(BigDecimal.ZERO::equals))
-                .map(cost -> new MoneyUpgradeRequirement(cost, balanceManagers));
+                .map(cost -> new MoneyUpgradeRequirement(cost, rounding, balanceManagers));
         final var itemRequirementStream = itemsRequired
                 .stream()
                 .map(ItemConfig::toItemStack)

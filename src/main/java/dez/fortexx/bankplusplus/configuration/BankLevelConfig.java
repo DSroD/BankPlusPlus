@@ -5,6 +5,7 @@ import de.exlll.configlib.Configuration;
 import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.IUpgradeRequirement;
+import dez.fortexx.bankplusplus.utils.ITransactionRounding;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,10 +33,10 @@ public class BankLevelConfig {
         this.requirements = upgrades;
     }
 
-    public BankLimit toBankLimit(List<IEconomyManager> balanceManagers) {
+    public BankLimit toBankLimit(List<IEconomyManager> balanceManagers, ITransactionRounding rounding) {
         final Set<IUpgradeRequirement> reqs = (this.requirements == null)
                 ? Set.of()
-                : requirements.toUpgradeRequirementsSet(balanceManagers);
+                : requirements.toUpgradeRequirementsSet(balanceManagers, rounding);
         return new BankLimit(
                 levelName,
                 moneyLimit,

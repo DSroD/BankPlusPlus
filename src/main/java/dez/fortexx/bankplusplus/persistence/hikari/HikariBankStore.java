@@ -3,6 +3,7 @@ package dez.fortexx.bankplusplus.persistence.hikari;
 import com.zaxxer.hikari.HikariDataSource;
 import dez.fortexx.bankplusplus.api.banktransactions.TransactionType;
 import dez.fortexx.bankplusplus.async.AsyncTask;
+import dez.fortexx.bankplusplus.async.BlockingScope;
 import dez.fortexx.bankplusplus.async.IAsyncScope;
 import dez.fortexx.bankplusplus.persistence.IBankStore;
 import dez.fortexx.bankplusplus.persistence.IScheduledPersistence;
@@ -81,13 +82,16 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
 
     @Override
     public BigDecimal getBankFunds(UUID playerUUID) {
-        final var cacheSnapshot = bankStoreCache.getSnapshot(playerUUID);
+        final var cacheSnapshot = getSnapshotOrLoad(playerUUID);
+        if (cacheSnapshot == null) {
+            loadPlayerSnapshot(BlockingScope.instance, playerUUID);
+        }
         return wal.getBalanceWithLogs(playerUUID, cacheSnapshot);
     }
 
     @Override
     public int getBankLevel(UUID playerUUID) {
-        final var cacheSnapshot = bankStoreCache.getSnapshot(playerUUID);
+        final var cacheSnapshot = getSnapshotOrLoad(playerUUID);
         return wal.getLevelWithLogs(playerUUID, cacheSnapshot);
     }
 
@@ -95,6 +99,7 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
     public AsyncTask<PersistenceResult> persistAsync() {
         return AsyncTask.of(this::persist);
     }
+
     private PersistenceResult persist(IAsyncScope scope) {
         final var playersToPersist = wal.dirtyBanks();
         if (playersToPersist.isEmpty())
@@ -102,9 +107,9 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
 
         final var updatedSnapshots = playersToPersist.stream()
                 .map(p -> {
-                    final var snapshot = bankStoreCache.getSnapshot(p);
                     if (p == null)
                         return null;
+                    final var snapshot = getSnapshotOrLoad(p);
                     final var withWAL = wal.applyWAL(p, snapshot);
                     return new SnapshotWithUUID(p, withWAL);
                 })
@@ -115,6 +120,17 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
                 .toList();
 
         return updateFromSnapshots(updatedSnapshots);
+    }
+
+    /**
+     * Gets snapshot or loads it from db - blocking current thread.
+     */
+    private IPlayerBankSnapshot getSnapshotOrLoad(UUID playerUUID) {
+        return bankStoreCache.getSnapshot(playerUUID)
+                .orElseGet(() -> {
+                    loadPlayerSnapshot(BlockingScope.instance, playerUUID);
+                    return bankStoreCache.getSnapshot(playerUUID).orElseThrow();
+                });
     }
 
     @Override

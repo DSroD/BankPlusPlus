@@ -9,6 +9,9 @@ commands:
 depend:
   - Vault
 
+softdepend:
+  - PlaceholderAPI
+
 libraries:
   - com.zaxxer:HikariCP:5.0.1
   - mysql:mysql-connector-java:8.0.33

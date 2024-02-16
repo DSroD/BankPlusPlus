@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IBankStoreCache {
-    IPlayerBankSnapshot getSnapshot(UUID playerUUID);
+    Optional<IPlayerBankSnapshot> getSnapshot(UUID playerUUID);
     void storePlayerSnapshot(UUID playerUUID, IPlayerBankSnapshot snapshot);
     Optional<Duration> snapshotAge(UUID playerUUID);
 }

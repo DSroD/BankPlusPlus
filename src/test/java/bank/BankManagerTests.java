@@ -149,7 +149,7 @@ public class BankManagerTests {
         bankEconomy.deposit(null, BigDecimal.TEN);
         final var result = bankManager.upgradeLimits(null);
         assertTrue(result instanceof SuccessUpgradeResult);
-        assertEquals(BigDecimal.ZERO, bankEconomy.getBalance(null));
+        assertEquals(rounding.round(BigDecimal.ZERO), bankEconomy.getBalance(null));
         assertEquals(BigDecimal.ZERO, otherEconomy.getBalance(null));
         assertEquals(2, bankEconomy.getBankLevel(null));
     }
@@ -172,7 +172,7 @@ public class BankManagerTests {
         final var result = bankManager.upgradeLimits(null);
         assertTrue(result instanceof SuccessUpgradeResult);
         assertEquals(BigDecimal.ZERO, otherEconomy.getBalance(null));
-        assertEquals(new BigDecimal("2"), bankEconomy.getBalance(null));
+        assertEquals(new BigDecimal("2.00"), bankEconomy.getBalance(null));
         assertEquals(2, bankEconomy.getBankLevel(null));
     }
 
@@ -238,7 +238,7 @@ public class BankManagerTests {
                 BankLevelConfig.of(
                         new BigDecimal("200"), "L2",
                         l2LimitsRequirements)
-        ).map(c -> c.toBankLimit(managers)).toList();
+        ).map(c -> c.toBankLimit(managers, rounding)).toList();
     }
 
     @Test
@@ -304,11 +304,6 @@ public class BankManagerTests {
 
             @Override
             public String getLimitPermissionNode(BankLimit limit) {
-                return null;
-            }
-
-            @Override
-            public String getLimitPermissionParentNode() {
                 return null;
             }
         }
