@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface ICommandArgument<T> {
-    String name();
+    @NotNull String name();
     T fromString(String arg);
     boolean verifyValue(String arg);
 

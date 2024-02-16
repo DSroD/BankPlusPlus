@@ -1,4 +1,4 @@
-package dez.fortexx.bankplusplus.commands;
+package dez.fortexx.bankplusplus.commands.user;
 
 import dez.fortexx.bankplusplus.bank.IBankLimitsManager;
 import dez.fortexx.bankplusplus.bank.upgrade.result.MaxLevelUpgradeResult;

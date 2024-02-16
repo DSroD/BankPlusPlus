@@ -1,4 +1,4 @@
-package dez.fortexx.bankplusplus.commands;
+package dez.fortexx.bankplusplus.commands.user;
 
 import dez.fortexx.bankplusplus.bank.IBankManager;
 import dez.fortexx.bankplusplus.commands.api.ICommand;

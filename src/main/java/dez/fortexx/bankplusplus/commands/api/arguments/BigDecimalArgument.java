@@ -22,7 +22,7 @@ public class BigDecimalArgument implements ICommandArgument<BigDecimal> {
     }
 
     @Override
-    public String name() {
+    public @NotNull String name() {
         return name;
     }
 
