@@ -7,6 +7,4 @@ public interface IUpgradePermissionManager {
     boolean canUpgrade(Player p, BankLimit limit);
 
     String getLimitPermissionNode(BankLimit limit);
-
-    String getLimitPermissionParentNode();
 }

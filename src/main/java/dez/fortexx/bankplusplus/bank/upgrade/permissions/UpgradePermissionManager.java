@@ -28,9 +28,4 @@ public class UpgradePermissionManager implements IUpgradePermissionManager {
         return Normalizer.normalize(node, Normalizer.Form.NFD)
                 .replaceAll("[^\\p{ASCII}]", "");
     }
-
-    @Override
-    public String getLimitPermissionParentNode() {
-        return parentNode;
-    }
 }

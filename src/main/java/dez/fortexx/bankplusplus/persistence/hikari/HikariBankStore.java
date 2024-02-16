@@ -114,12 +114,7 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
                 ))
                 .toList();
 
-        try {
-            updateFromSnapshots(updatedSnapshots);
-        } catch (SQLException e) {
-            return new Failure(e.getMessage());
-        }
-        return Success.instance;
+        return updateFromSnapshots(updatedSnapshots);
     }
 
     @Override
@@ -176,21 +171,24 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
         statement.execute();
     }
 
-    private void updateFromSnapshots(Collection<SnapshotWithUUID> snapshots) throws SQLException {
-        final var connection = dataSource.getConnection();
-        connection.setAutoCommit(false);
-        final var updateSql = "UPDATE " + tableName + " SET bankLevel = ?, balance = ? WHERE player = ?";
-        final var statement = connection.prepareStatement(updateSql);
+    private PersistenceResult updateFromSnapshots(Collection<SnapshotWithUUID> snapshots) {
+        try (final var connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            final var updateSql = "UPDATE " + tableName + " SET bankLevel = ?, balance = ? WHERE player = ?";
+            final var statement = connection.prepareStatement(updateSql);
 
-        for (final var snapshot : snapshots) {
-            statement.setInt(1, snapshot.snapshot.getLevel());
-            statement.setString(2, snapshot.snapshot.getBalance().toPlainString());
-            statement.setString(3, snapshot.playerUUID.toString());
-            statement.addBatch();
+            for (final var snapshot : snapshots) {
+                statement.setInt(1, snapshot.snapshot.getLevel());
+                statement.setString(2, snapshot.snapshot.getBalance().toPlainString());
+                statement.setString(3, snapshot.playerUUID.toString());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+            connection.commit();
+            return Success.instance;
+        } catch (SQLException e) {
+            return new Failure(e.getMessage());
         }
-        statement.executeBatch();
-        connection.commit();
-        connection.close();
     }
 
     private Optional<BankSnapshot> getBankSnapshotFromDatabase(Connection connection, UUID playerUUID) throws SQLException {
