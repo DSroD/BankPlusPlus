@@ -4,7 +4,7 @@ import dez.fortexx.bankplusplus.scheduler.IScheduler;
 
 import java.util.function.Consumer;
 
-public class SchedulerScope implements IAsyncScope {
+public final class SchedulerScope implements IAsyncScope {
     private final IScheduler scheduler;
 
     private SchedulerScope(IScheduler scheduler) {

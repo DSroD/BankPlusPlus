@@ -49,20 +49,18 @@ public class BalanceCommand implements ICommand {
 
     @Override
     public @NotNull Optional<String> getPermission() {
-        return Optional.of(
-                "bankplusplus.use"
-        );
+        return Optional.of("bankplusplus.use");
     }
 
     @Override
     public @NotNull ICommandResult invoke(CommandSender sender, String[] args) {
         if (sender instanceof Player p) {
-            return handlePlayer(p, args);
+            return handlePlayer(p);
         }
         return InvalidCommandSenderResult.instance;
     }
 
-    private ICommandResult handlePlayer(Player p, String[] args) {
+    private ICommandResult handlePlayer(Player p) {
         final var balance = bankManager.getBalance(p);
         final var limit = bankManager.getLimit(p);
 

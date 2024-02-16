@@ -56,9 +56,7 @@ public class DepositCommand implements ICommand {
 
     @Override
     public @NotNull Optional<String> getPermission() {
-        return Optional.of(
-                "bankplusplus.use"
-        );
+        return Optional.of("bankplusplus.use");
     }
 
     @Override

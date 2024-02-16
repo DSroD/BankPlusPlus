@@ -2,7 +2,7 @@ package dez.fortexx.bankplusplus.async;
 
 import java.util.function.Consumer;
 
-public class BlockingScope implements IAsyncScope {
+public final class BlockingScope implements IAsyncScope {
     public static final BlockingScope instance = new BlockingScope();
 
     @Override

@@ -28,7 +28,7 @@ import java.util.Optional;
 /**
  * Provides transactions between bank account any player account provided using playerBalanceManager
  */
-public class BankManager implements IBankManager {
+public final class BankManager implements IBankManager {
     @Unmodifiable
     private final List<BankLimit> bankLimits;
     private final IEconomyManager playerBalanceManager;
