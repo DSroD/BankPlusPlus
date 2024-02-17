@@ -1,10 +1,14 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'java'
+    id 'com.olafmertens.git-version' version '0.1.1'
+}
+
+gitVersion {
+    versionTagPrefix = 'v'
 }
 
 group = 'dez.fortexx'
-version = '0.1.0'
 
 repositories {
     mavenCentral()
@@ -83,4 +87,6 @@ shadowJar {
     dependencies {
         exclude(dependency('org.snakeyaml:snakeyaml-engine'))
     }
+
+    archiveFileName = "${rootProject.name}.jar"
 }
