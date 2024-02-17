@@ -4,7 +4,7 @@ on:
     branches:
       - master
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,9 +17,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.5
-
-      - name: Build
-        run: gradle build
 
       - name: Test
         run: gradle test
