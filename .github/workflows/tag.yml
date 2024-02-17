@@ -20,7 +20,7 @@ jobs:
 
       - name: get-project-name
         id: extract_project_name
-        run: echo "project_name=$(grep 'rootProject.name' settings.gradle | cut -d'"' -f2)" >> $GITHUB_OUTPUT
+        run: echo "project_name=$(grep 'rootProject.name' settings.gradle | cut -d "'" -f2)" >> $GITHUB_OUTPUT
 
       - name: jar-with-deps
         run: gradle shadowJar
