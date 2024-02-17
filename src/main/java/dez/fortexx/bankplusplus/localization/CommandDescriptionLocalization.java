@@ -10,6 +10,7 @@ public class CommandDescriptionLocalization {
     private String balance = "get account balance";
     private String upgrade = "upgrade bank account";
     private String info = "bank account info";
+    private String pbalance = "get account balance of other players";
     public String getWithdrawCommandDescription() {
         return withdraw;
     }
@@ -28,5 +29,9 @@ public class CommandDescriptionLocalization {
 
     public String getInfoCommandDescription() {
         return info;
+    }
+
+    public String getPbalance() {
+        return pbalance;
     }
 }

@@ -52,6 +52,17 @@ Withdrawals are done in such a way the player actually receives the amount asked
 Deposits are done in the opposite way - fee is deducted from the `amount` argument - actual change in the bank account is
 *smaller* than `amount` argument.
 
+## Placeholders
+
+This plugin implements placeholder extension.
+You can use following placeholders if PlaceholderAPI is installed
+on the server.
+
+| Placeholder                 | Description                     |
+|-----------------------------|---------------------------------|
+| %bankplusplus_bank_balance% | Balance of players bank account |
+| %bankplusplus_bank_level%   | Level of players bank account   |   
+
 ## Building from source
 
 Use gradle tasks to build the plugin from source. Shadow gradle plugin is
@@ -60,13 +71,13 @@ shadowJar task to build the actual jar file.
 
 ## TODO
 
-- GitHub actions to build the plugin and provide artifacts
-- Interest (online/offline based on permissions/configuration and bank level)
 - Admin commands for managing bank - setting and inspecting levels and bank balance of
 players on the server
 - Transactions for BankManager instead of *check and hope for the best* approach
 - More persistence providers (such as file databases)
 - Fee levels (i.e. based on permissions/configuration and bank level)
+- More tests, especially integration tests
+- Interest (online/offline based on permissions/configuration and bank level)
 - Some cleanup and improvement on design choices
 
 ## Contributing

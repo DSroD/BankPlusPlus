@@ -7,6 +7,7 @@ import dez.fortexx.bankplusplus.bank.fees.PercentageFeeProvider;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.UpgradePermissionManager;
+import dez.fortexx.bankplusplus.commands.admin.PlayerBalanceCommand;
 import dez.fortexx.bankplusplus.commands.api.CommandDispatcher;
 import dez.fortexx.bankplusplus.commands.api.arguments.validator.BasicValidator;
 import dez.fortexx.bankplusplus.commands.user.*;
@@ -28,8 +29,6 @@ import dez.fortexx.bankplusplus.scheduler.IScheduler;
 import dez.fortexx.bankplusplus.utils.ITransactionRounding;
 import dez.fortexx.bankplusplus.utils.TimeProvider;
 import dez.fortexx.bankplusplus.utils.formatting.CurrencyFormatter;
-import dez.fortexx.bankplusplus.utils.formatting.ICurrencyFormatter;
-import dez.fortexx.bankplusplus.utils.formatting.IUpgradeRequirementFormatter;
 import dez.fortexx.bankplusplus.utils.formatting.UpgradeRequirementFormatter;
 import dez.fortexx.bankplusplus.vault.VaultEconomy;
 import net.milkbowl.vault.economy.Economy;
@@ -38,7 +37,6 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.RoundingMode;
@@ -157,11 +155,19 @@ public final class BankPlusPlus extends JavaPlugin {
         /*
          * COMMANDS
          */
-        final var bankCommandDispatcher = createCommandDispatcher(
+        final var argumentValidator = new BasicValidator();
+        final var bankCommandDispatcher = new CommandDispatcher(
+                "bank",
+                List.of(
+                        new BalanceCommand(bankManager, localization, currencyFormatter),
+                        new InfoCommand(bankManager, localization, currencyFormatter, upgradeRequirementFormatter),
+                        new DepositCommand(bankManager, localization, currencyFormatter),
+                        new WithdrawCommand(bankManager, localization, currencyFormatter),
+                        new UpgradeCommand(bankManager, localization, currencyFormatter, upgradeRequirementFormatter),
+                        new PlayerBalanceCommand(this, bankEconomyManager, localization, timeProvider, currencyFormatter)
+                ),
                 localization,
-                bankManager,
-                currencyFormatter,
-                upgradeRequirementFormatter
+                argumentValidator
         );
         bankCommandDispatcher.register(this);
 
@@ -187,28 +193,6 @@ public final class BankPlusPlus extends JavaPlugin {
             final var expansion = new BankPlusPlusPlaceholderExpansion(this, bankStore, currencyFormatter);
             expansion.register();
         }
-    }
-
-    @NotNull
-    private static CommandDispatcher createCommandDispatcher(
-            Localization localization,
-            BankManager bankManager,
-            ICurrencyFormatter currencyFormatter,
-            IUpgradeRequirementFormatter upgradeRequirementFormatter
-    ) {
-        final var argumentValidator = new BasicValidator();
-        return new CommandDispatcher(
-                "bank",
-                List.of(
-                    new DepositCommand(bankManager, localization, currencyFormatter),
-                    new WithdrawCommand(bankManager, localization, currencyFormatter),
-                    new BalanceCommand(bankManager, localization, currencyFormatter),
-                    new UpgradeCommand(bankManager, localization, currencyFormatter, upgradeRequirementFormatter),
-                    new InfoCommand(bankManager, localization, currencyFormatter, upgradeRequirementFormatter)
-                ),
-                localization,
-                argumentValidator
-        );
     }
 
     @Nullable

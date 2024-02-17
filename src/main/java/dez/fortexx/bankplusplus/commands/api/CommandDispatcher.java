@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -179,7 +180,12 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
 
     private Map<String, ICommand> commandMapFromList(List<ICommand> commands) {
         return commands.stream()
-                .collect(Collectors.toMap(ICommand::getCommandName, Function.identity()));
+                .collect(Collectors.toMap(
+                        ICommand::getCommandName,
+                        Function.identity(),
+                        (v1, v2) -> v2,
+                        // This creates a sorted map
+                        TreeMap::new));
     }
 
     @Nullable

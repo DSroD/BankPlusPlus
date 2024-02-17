@@ -10,6 +10,7 @@ public class Localization {
     private String newBalance = "New balance";
     private String fees = "Fees";
     private String amount = "Amount";
+    private String player = "Player";
     private String balance = "Account balance";
     private String depositSuccessful = "Successfully deposited money to the bank";
     private String depositFailed = "Failed to deposit money to the bank";
@@ -141,5 +142,9 @@ public class Localization {
 
     public String getMaximumWithdrawalPossible() {
         return maximumWithdrawalPossible;
+    }
+
+    public String getPlayer() {
+        return player;
     }
 }
