@@ -14,10 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -185,7 +182,7 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
                         Function.identity(),
                         (v1, v2) -> v2,
                         // This creates a sorted map
-                        TreeMap::new));
+                        LinkedHashMap::new));
     }
 
     @Nullable
