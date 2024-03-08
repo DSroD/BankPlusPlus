@@ -17,23 +17,30 @@ Just drop the JAR from artifacts (TODO - github actions) into plugins folder in 
 
 ### Commands
 
-| Command                   | Permission required                                | Description                                 |
-|---------------------------|----------------------------------------------------|---------------------------------------------|
-| `/bank info`              | bankplusplus.use                                   | Information about bank account and upgrades |
-| `/bank balance`           | bankplusplus.use                                   | Balance of the bank account                 |
-| `/bank deposit [amount]`  | bankplusplus.use                                   | Deposit give amount to the bank             |
-| `/bank withdraw [amount]` | bankplusplus.use                                   | Withdraws given amount from the bank        |
-| `/bank upgrade`           | bankplusplus.use + see [Permissions](#permissions) | Upgrades bank level                         |
+| Command                          | Permission required                                | Description                                                    |
+|----------------------------------|----------------------------------------------------|----------------------------------------------------------------|
+| `/bank info`                     | bankplusplus.use                                   | Information about bank account and upgrades                    |
+| `/bank balance`                  | bankplusplus.use                                   | Balance of the bank account                                    |
+| `/bank deposit [amount]`         | bankplusplus.use                                   | Deposit give amount to the bank                                |
+| `/bank withdraw [amount]`        | bankplusplus.use                                   | Withdraws given amount from the bank                           |
+| `/bank upgrade`                  | bankplusplus.use + see [Permissions](#permissions) | Upgrades bank level                                            |
+| `/bank pbalance [player]`        | bankplusplus.admin.playerbalance                   | Balance of players bank account                                |
+| `/bank give [player] [amount]`   | bankplusplus.admin.give                            | Gives money to the players account, considering limits         |
+| `\bank take [player] [amount]`   | bankplusplus.admin.take                            | Takes money from the players account (can not go below zero)   |
 
 ### Permissions
 
-| Permission                          | Description                                        |
-|-------------------------------------|----------------------------------------------------|
-| `bankplusplus.use`                  | Allows usage of all basic commands                 |
-| `bankplusplus.fees.bypass`          | User ignores deposit and withdraw fee              |
-| `bankplusplus.fees.bypass.deposit`  | User ignores deposit fee                           |
-| `bankplusplus.fees.bypass.withdraw` | User ignores withdraw fee                          |
-| `bankplusplus.upgrade.[level_name]` | Allows user to upgrade bank to the specified level |
+| Permission                          | Description                                                       |
+|-------------------------------------|-------------------------------------------------------------------|
+| `bankplusplus.use`                  | Allows usage of all basic commands                                |
+| `bankplusplus.fees.bypass`          | User ignores deposit and withdraw fee                             |
+| `bankplusplus.fees.bypass.deposit`  | User ignores deposit fee                                          |
+| `bankplusplus.fees.bypass.withdraw` | User ignores withdraw fee                                         |
+| `bankplusplus.upgrade.[level_name]` | Allows user to upgrade bank to the specified level                |
+| `bankplusplus.admin`                | Allows use of all admin commands (see respective sub-permissions) |
+| `bankplusplus.admin.playerbalance`  | Allows use of pbalance command                                    |
+| `bankplusplus.admin.give`           | Allows use of give command                                        |
+| `bankplusplus.admin.take`           | Allows use of take command                                        |
 
 #### Notes:
 
