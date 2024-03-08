@@ -64,8 +64,8 @@ public class InfoCommand implements ICommand {
     }
 
     private @NotNull ICommandResult handlePlayer(Player p) {
-        final var bankLimit = limitsManager.getLimit(p);
-        final var nextLevelLimit = limitsManager.getNextLevelLimit(p);
+        final var bankLimit = limitsManager.getBankLevelLimit(p);
+        final var nextLevelLimit = limitsManager.getNextBankLevelLimit(p);
         final var builder = new ComponentBuilder(localization.getAccountLevelName())
                 .color(ChatColor.GOLD).bold(true)
                 .append(": ")

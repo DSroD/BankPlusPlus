@@ -94,7 +94,7 @@ public class UpgradeCommand implements ICommand {
     }
 
     private ICommandResult handleSuccess(Player p) {
-        final var newLimit = limitsManager.getLimit(p);
+        final var newLimit = limitsManager.getBankLevelLimit(p);
         final var component = new ComponentBuilder(localization.getUpgradeSuccessful())
                 .color(ChatColor.DARK_GREEN).bold(true)
                 .append("! ")

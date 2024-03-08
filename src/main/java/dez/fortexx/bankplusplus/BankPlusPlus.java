@@ -1,13 +1,15 @@
 package dez.fortexx.bankplusplus;
 
 import dez.fortexx.bankplusplus.async.BlockingScope;
-import dez.fortexx.bankplusplus.bank.BankManager;
+import dez.fortexx.bankplusplus.bank.BankTransactionManager;
 import dez.fortexx.bankplusplus.bank.balance.BankEconomyManager;
 import dez.fortexx.bankplusplus.bank.fees.PercentageFeeProvider;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.UpgradePermissionManager;
+import dez.fortexx.bankplusplus.commands.admin.GiveCommand;
 import dez.fortexx.bankplusplus.commands.admin.PlayerBalanceCommand;
+import dez.fortexx.bankplusplus.commands.admin.TakeCommand;
 import dez.fortexx.bankplusplus.commands.api.CommandDispatcher;
 import dez.fortexx.bankplusplus.commands.api.arguments.validator.BasicValidator;
 import dez.fortexx.bankplusplus.commands.user.*;
@@ -18,10 +20,10 @@ import dez.fortexx.bankplusplus.handlers.PlayerJoinHandler;
 import dez.fortexx.bankplusplus.localization.Localization;
 import dez.fortexx.bankplusplus.logging.BukkitPluginLogger;
 import dez.fortexx.bankplusplus.persistence.IScheduledPersistence;
+import dez.fortexx.bankplusplus.persistence.api.Failure;
 import dez.fortexx.bankplusplus.persistence.cache.LRUBankStoreCache;
 import dez.fortexx.bankplusplus.persistence.hikari.HikariBankStore;
 import dez.fortexx.bankplusplus.persistence.hikari.HikariBankStoreConfig;
-import dez.fortexx.bankplusplus.persistence.api.Failure;
 import dez.fortexx.bankplusplus.persistence.wal.BankStoreWAL;
 import dez.fortexx.bankplusplus.placeholders.BankPlusPlusPlaceholderExpansion;
 import dez.fortexx.bankplusplus.scheduler.BukkitScheduler;
@@ -61,7 +63,7 @@ public final class BankPlusPlus extends JavaPlugin {
         /*
          * Bukkit specific and other plugin interop
          */
-        final var eventCaller = new BukkitEventDispatcher();
+        final var eventDispatcher = new BukkitEventDispatcher();
         final var logger = new BukkitPluginLogger(this, config.getLogLevel());
         final var scheduler = new BukkitScheduler(this);
         this.scheduler = scheduler;
@@ -110,37 +112,45 @@ public final class BankPlusPlus extends JavaPlugin {
                 rounding
         );
 
+        final var upgradePermissionNode = "bankplusplus.upgrade";
+        final var bankUpgradePermissionManager = new UpgradePermissionManager(upgradePermissionNode);
+
         /*
          * BANK MANAGER
          */
-        final var bankEconomyManager = new BankEconomyManager(bankStore);
+        final var bankEconomyManager = new BankEconomyManager(
+                bankStore,
+                bankUpgradePermissionManager,
+                eventDispatcher,
+                logger
+        );
+
         final var economyManagers = List.of(
                 balanceManager,
                 bankEconomyManager
         );
-        final var upgradePermissionNode = "bankplusplus.upgrade";
-        final var bankUpgradePermissionChecker = new UpgradePermissionManager(upgradePermissionNode);
-
-        final var bankLevels = config.getBankLevels()
+        final var bankLevels =  config.getBankLevels()
                 .stream()
                 .map(level -> level.toBankLimit(economyManagers, rounding))
                 .toList();
 
+        bankEconomyManager.setBankLimits(bankLevels);
+
+
+
         // Register upgrade permission node for each level (except the first one) of bank
         final var registerUpgradeNode = registerUpgradePermissionNode(
                 "Allows to upgrade to this bank level",
-                bankUpgradePermissionChecker
+                bankUpgradePermissionManager
         );
         bankLevels.stream().skip(1)
                 .forEach(registerUpgradeNode);
 
-        final var bankManager = new BankManager(
-                bankLevels,
+        final var bankTransactionManager = new BankTransactionManager(
                 balanceManager,
                 bankEconomyManager,
-                bankUpgradePermissionChecker,
                 taxProvider,
-                eventCaller,
+                eventDispatcher,
                 rounding,
                 logger
         );
@@ -159,12 +169,14 @@ public final class BankPlusPlus extends JavaPlugin {
         final var bankCommandDispatcher = new CommandDispatcher(
                 "bank",
                 List.of(
-                        new BalanceCommand(bankManager, localization, currencyFormatter),
-                        new InfoCommand(bankManager, localization, currencyFormatter, upgradeRequirementFormatter),
-                        new DepositCommand(bankManager, localization, currencyFormatter),
-                        new WithdrawCommand(bankManager, localization, currencyFormatter),
-                        new UpgradeCommand(bankManager, localization, currencyFormatter, upgradeRequirementFormatter),
-                        new PlayerBalanceCommand(this, bankEconomyManager, localization, timeProvider, currencyFormatter)
+                        new BalanceCommand(bankEconomyManager, localization, currencyFormatter),
+                        new InfoCommand(bankEconomyManager, localization, currencyFormatter, upgradeRequirementFormatter),
+                        new DepositCommand(bankTransactionManager, localization, currencyFormatter),
+                        new WithdrawCommand(bankTransactionManager, localization, currencyFormatter),
+                        new UpgradeCommand(bankEconomyManager, localization, currencyFormatter, upgradeRequirementFormatter),
+                        new PlayerBalanceCommand(this, bankEconomyManager, localization, timeProvider, currencyFormatter),
+                        new GiveCommand(this, bankEconomyManager, localization, timeProvider, currencyFormatter),
+                        new TakeCommand(this, bankEconomyManager, localization, timeProvider, currencyFormatter)
                 ),
                 localization,
                 argumentValidator

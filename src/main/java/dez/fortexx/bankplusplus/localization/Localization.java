@@ -19,7 +19,7 @@ public class Localization {
     private String insufficientFunds = "Insufficient funds";
     private String maximumWithdrawalPossible = "Maximal withdrawal possible";
     private String amountTooSmall = "Transaction amount too small";
-    private String limitViolation = "Transaction violates your bank limit";
+    private String limitViolation = "Transaction violates bank limit";
     private String upgradeSuccessful = "Bank upgraded successfully";
     private String upgradeFailed = "Could not upgrade bank";
     private String bankAlreadyMaxLevel = "Bank is already fully upgraded";
@@ -37,6 +37,7 @@ public class Localization {
 
     private CommandDescriptionLocalization commandDescriptions = new CommandDescriptionLocalization();
     private CommandBaseLocalization commandBase = new CommandBaseLocalization();
+    private AdminCommandLocalization commandAdmin = new AdminCommandLocalization();
 
     public String getNewBalance() {
         return newBalance;
@@ -84,9 +85,7 @@ public class Localization {
         return amountTooSmall;
     }
 
-    public String getLimitViolation() {
-        return limitViolation;
-    }
+    public String getLimitViolation() { return limitViolation; }
 
     public String getCurrencySymbol() {
         return currencySymbol;
@@ -146,5 +145,9 @@ public class Localization {
 
     public String getPlayer() {
         return player;
+    }
+
+    public AdminCommandLocalization getCommandAdmin() {
+        return commandAdmin;
     }
 }

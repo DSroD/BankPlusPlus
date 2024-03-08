@@ -48,7 +48,7 @@ public class PlayerBalanceCommand implements ICommand {
 
     @Override
     public @NotNull String getCommandDescription() {
-        return localization.getCommandDescriptions().getPbalance();
+        return localization.getCommandDescriptions().getPbalanceDescription();
     }
 
     @Override
@@ -67,6 +67,11 @@ public class PlayerBalanceCommand implements ICommand {
     public @NotNull ICommandResult invoke(CommandSender sender, String[] args) {
         final var playerName = args[0];
         final var offlinePlayer = playerArgument.fromString(playerName);
+
+        if (offlinePlayer == null) {
+            return errorResult(localization.getCommandBase().getPlayerNotFound());
+        }
+
         final var balanceResult = bankEconomyManager.getBalance(offlinePlayer);
 
         final var component = new ComponentBuilder(localization.getBalance())
@@ -82,5 +87,12 @@ public class PlayerBalanceCommand implements ICommand {
 
         return new BaseComponentResult(component);
 
+    }
+
+    private BaseComponentResult errorResult(String message) {
+        final var component = new ComponentBuilder(message)
+                .color(ChatColor.RED).bold(true)
+                .create();
+        return new BaseComponentResult(component);
     }
 }

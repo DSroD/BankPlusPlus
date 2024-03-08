@@ -14,7 +14,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,9 @@ public class CommandDispatcher implements CommandExecutor, TabCompleter {
 
     public void register(JavaPlugin plugin) {
         final var cmd = plugin.getCommand(this.rootCommandName);
+        if (cmd == null) {
+            throw new RuntimeException("Could not register command " + this.rootCommandName);
+        }
         cmd.setExecutor(this);
         cmd.setTabCompleter(this);
     }

@@ -10,6 +10,7 @@ public class CommandBaseLocalization {
     private String invalidUsage = "Invalid usage";
     private String error = "An error occurred when running the command. Please inform administrators about this.";
     private String missingPermission = "You do not have permission to use this command";
+    private String playerNotFound = "Player not found!";
 
     public String getCommandUsage() {
         return commandUsage;
@@ -29,5 +30,9 @@ public class CommandBaseLocalization {
 
     public String getMissingPermission() {
         return missingPermission;
+    }
+
+    public String getPlayerNotFound() {
+        return playerNotFound;
     }
 }

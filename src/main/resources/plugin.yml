@@ -29,3 +29,5 @@ permissions:
     default: op
     children:
       bankplusplus.admin.playerbalance: true
+      bankplusplus.admin.give: true
+      bankplusplus.admin.take: true

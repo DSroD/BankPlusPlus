@@ -1,7 +1,7 @@
 package dez.fortexx.bankplusplus.commands.user;
 
-import dez.fortexx.bankplusplus.bank.IBankBalanceManager;
-import dez.fortexx.bankplusplus.bank.transaction.*;
+import dez.fortexx.bankplusplus.api.economy.result.*;
+import dez.fortexx.bankplusplus.bank.IBankTransactionManager;
 import dez.fortexx.bankplusplus.commands.api.ICommand;
 import dez.fortexx.bankplusplus.commands.api.arguments.BigDecimalArgument;
 import dez.fortexx.bankplusplus.commands.api.arguments.ICommandArgument;
@@ -22,12 +22,12 @@ import java.util.Optional;
 
 public class WithdrawCommand implements ICommand {
     private final BigDecimalArgument amountArgument;
-    private final IBankBalanceManager transactionManager;
+    private final IBankTransactionManager transactionManager;
     private final Localization localization;
     private final ICurrencyFormatter currencyFormatter;
 
     public WithdrawCommand(
-            IBankBalanceManager transactionManager,
+            IBankTransactionManager transactionManager,
             Localization localization,
             ICurrencyFormatter currencyFormatter
     ) {
@@ -72,28 +72,28 @@ public class WithdrawCommand implements ICommand {
         final var amountString = args[0];
 
         final var amount = amountArgument.fromString(amountString);
-        final var result = transactionManager.withdraw(p, amount);
+        final var result = transactionManager.withdrawFromBank(p, amount);
 
-        if (result instanceof SuccessTransactionResult successRes) {
+        if (result instanceof Success successRes) {
             return successResult(successRes);
         }
-        if (result instanceof InsufficientFundsTransactionResult i) {
+        if (result instanceof InsufficientFunds i) {
             return insufficientFundsResult(i);
         }
-        if (result instanceof AmountTooSmallTransactionResult) {
+        if (result instanceof AmountTooSmall) {
             return errorResult(localization.getWithdrawFailed() + ". " + localization.getAmountTooSmall());
         }
-        if (result instanceof LimitsViolationsTransactionResult) {
+        if (result instanceof LimitViolation) {
             return errorResult(localization.getWithdrawFailed() + ". " + localization.getLimitViolation());
         }
-        if (result instanceof DescribedTransactionFailureResult dr) {
+        if (result instanceof DescribedFailure dr) {
             return errorResult(dr.description());
         }
         return ErrorResult.instance;
     }
 
     @NotNull
-    private BaseComponentResult successResult(SuccessTransactionResult sr) {
+    private BaseComponentResult successResult(Success sr) {
         final var component = new ComponentBuilder(localization.getWithdrawSuccessful())
                 .color(ChatColor.DARK_GREEN).bold(true)
                 .append(". ")
@@ -121,7 +121,7 @@ public class WithdrawCommand implements ICommand {
         return new BaseComponentResult(component);
     }
 
-    private BaseComponentResult insufficientFundsResult(InsufficientFundsTransactionResult res) {
+    private BaseComponentResult insufficientFundsResult(InsufficientFunds res) {
         final var component = new ComponentBuilder(localization.getWithdrawFailed())
                 .color(ChatColor.RED).bold(true)
                 .append(". ")

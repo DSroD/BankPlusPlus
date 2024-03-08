@@ -1,6 +1,6 @@
 package dez.fortexx.bankplusplus.api.economy.result;
 
-public record DescribedFailureEconomyResult(
+public record DescribedFailure(
         String description
 ) implements EconomyResult {
 }
