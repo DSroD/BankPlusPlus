@@ -1,7 +1,7 @@
 package dez.fortexx.bankplusplus.commands.user;
 
-import dez.fortexx.bankplusplus.bank.IBankBalanceManager;
-import dez.fortexx.bankplusplus.bank.transaction.*;
+import dez.fortexx.bankplusplus.api.economy.result.*;
+import dez.fortexx.bankplusplus.bank.IBankTransactionManager;
 import dez.fortexx.bankplusplus.commands.api.ICommand;
 import dez.fortexx.bankplusplus.commands.api.arguments.BigDecimalArgument;
 import dez.fortexx.bankplusplus.commands.api.arguments.ICommandArgument;
@@ -22,12 +22,12 @@ import java.util.Optional;
 
 public class DepositCommand implements ICommand {
     private final BigDecimalArgument amountArgument;
-    private final IBankBalanceManager transactionManager;
+    private final IBankTransactionManager transactionManager;
     private final Localization localization;
     private final ICurrencyFormatter currencyFormatter;
 
     public DepositCommand(
-            IBankBalanceManager transactionManager,
+            IBankTransactionManager transactionManager,
             Localization localization,
             ICurrencyFormatter currencyFormatter
     ) {
@@ -73,46 +73,45 @@ public class DepositCommand implements ICommand {
         final var amountString = args[0];
 
         final var amount = amountArgument.fromString(amountString);
-        final var result = transactionManager.deposit(p, amount);
+        final var result = transactionManager.depositToBank(p, amount);
 
-        if (result instanceof SuccessTransactionResult successRes) {
+        if (result instanceof Success successRes) {
             return successResult(successRes);
         }
-        if (result instanceof InsufficientFundsTransactionResult) {
+        if (result instanceof InsufficientFunds) {
             return errorResult(localization.getDepositFailed() + ". " + localization.getInsufficientFunds() + ".");
         }
-        if (result instanceof AmountTooSmallTransactionResult) {
+        if (result instanceof AmountTooSmall) {
             return errorResult(localization.getDepositFailed() + ". " + localization.getAmountTooSmall() + ".");
         }
-        if (result instanceof LimitsViolationsTransactionResult) {
+        if (result instanceof LimitViolation) {
             return errorResult(localization.getDepositFailed() + ". " + localization.getLimitViolation() + ".");
         }
-        if (result instanceof DescribedTransactionFailureResult dr) {
+        if (result instanceof DescribedFailure dr) {
             return errorResult(dr.description());
         }
         return ErrorResult.instance;
     }
 
     @NotNull
-    private BaseComponentResult successResult(SuccessTransactionResult sr) {
+    private BaseComponentResult successResult(Success sr) {
         final var component = new ComponentBuilder(localization.getDepositSuccessful())
                 .color(ChatColor.DARK_GREEN).bold(true)
                 .append(". ")
                 .append(localization.getNewBalance())
-                .append(": ")
                 .bold(false)
+                .append(": ")
                 .append(currencyFormatter.formatCurrency(sr.newBalance()))
                 .color(ChatColor.GOLD).bold(true)
                 .append(". ")
+                .color(ChatColor.DARK_GREEN).bold(false)
                 .append(localization.getFees())
                 .color(ChatColor.RED).bold(false)
                 .append(": ")
                 .append(currencyFormatter.formatCurrency(sr.feesPaid()))
                 .append(".")
                 .create();
-        return new BaseComponentResult(
-                component
-        );
+        return new BaseComponentResult(component);
     }
 
     private static BaseComponentResult errorResult(String text) {

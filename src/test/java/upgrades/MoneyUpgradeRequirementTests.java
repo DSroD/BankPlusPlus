@@ -2,8 +2,8 @@ package upgrades;
 
 import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
 import dez.fortexx.bankplusplus.api.economy.result.EconomyResult;
-import dez.fortexx.bankplusplus.api.economy.result.FailureEconomyResult;
-import dez.fortexx.bankplusplus.api.economy.result.SuccessEconomyResult;
+import dez.fortexx.bankplusplus.api.economy.result.Failure;
+import dez.fortexx.bankplusplus.api.economy.result.Success;
 import dez.fortexx.bankplusplus.bank.upgrade.MoneyUpgradeRequirement;
 import dez.fortexx.bankplusplus.utils.ITransactionRounding;
 import org.bukkit.OfflinePlayer;
@@ -86,16 +86,16 @@ public class MoneyUpgradeRequirementTests {
         @Override
         public EconomyResult deposit(OfflinePlayer player, BigDecimal amount) {
             this.amount = this.amount.add(amount);
-            return SuccessEconomyResult.instance;
+            return new Success(amount, BigDecimal.ZERO);
         }
 
         @Override
         public EconomyResult withdraw(OfflinePlayer player, BigDecimal amount) {
             if (this.amount.compareTo(amount) < 0) {
-                return FailureEconomyResult.instance;
+                return Failure.instance;
             }
             this.amount = this.amount.subtract(amount);
-            return SuccessEconomyResult.instance;
+            return new Success(amount, BigDecimal.ZERO);
         }
 
         @Override

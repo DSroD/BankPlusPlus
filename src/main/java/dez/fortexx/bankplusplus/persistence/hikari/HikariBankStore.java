@@ -7,13 +7,14 @@ import dez.fortexx.bankplusplus.async.BlockingScope;
 import dez.fortexx.bankplusplus.async.IAsyncScope;
 import dez.fortexx.bankplusplus.persistence.IBankStore;
 import dez.fortexx.bankplusplus.persistence.IScheduledPersistence;
-import dez.fortexx.bankplusplus.persistence.cache.IBankStoreCache;
-import dez.fortexx.bankplusplus.persistence.cache.snapshot.BankSnapshot;
-import dez.fortexx.bankplusplus.persistence.cache.snapshot.IPlayerBankSnapshot;
 import dez.fortexx.bankplusplus.persistence.api.Failure;
 import dez.fortexx.bankplusplus.persistence.api.PersistenceResult;
 import dez.fortexx.bankplusplus.persistence.api.Success;
+import dez.fortexx.bankplusplus.persistence.cache.IBankStoreCache;
+import dez.fortexx.bankplusplus.persistence.cache.snapshot.BankSnapshot;
+import dez.fortexx.bankplusplus.persistence.cache.snapshot.IPlayerBankSnapshot;
 import dez.fortexx.bankplusplus.persistence.wal.BankDepositOrWithdrawTransaction;
+import dez.fortexx.bankplusplus.persistence.wal.BankDowngradeTransaction;
 import dez.fortexx.bankplusplus.persistence.wal.BankUpgradeTransaction;
 import dez.fortexx.bankplusplus.persistence.wal.IBankStoreWAL;
 
@@ -76,6 +77,14 @@ public class HikariBankStore implements IBankStore, IScheduledPersistence {
     public boolean upgradeLevel(UUID playerUUID) {
         this.wal.insertTransaction(
                 playerUUID, BankUpgradeTransaction.instance
+        );
+        return true;
+    }
+
+    @Override
+    public boolean downgradeLevel(UUID playerUUID) {
+        this.wal.insertTransaction(
+                playerUUID, BankDowngradeTransaction.instance
         );
         return true;
     }

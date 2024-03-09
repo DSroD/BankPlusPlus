@@ -1,6 +1,6 @@
 package dez.fortexx.bankplusplus.commands.user;
 
-import dez.fortexx.bankplusplus.bank.IBankManager;
+import dez.fortexx.bankplusplus.bank.IBankEconomyManager;
 import dez.fortexx.bankplusplus.commands.api.ICommand;
 import dez.fortexx.bankplusplus.commands.api.arguments.ICommandArgument;
 import dez.fortexx.bankplusplus.commands.api.result.BaseComponentResult;
@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class BalanceCommand implements ICommand {
-    private final IBankManager bankManager;
+    private final IBankEconomyManager bankManager;
     private final Localization localization;
     private final ICurrencyFormatter currencyFormatter;
 
     public BalanceCommand(
-            IBankManager bankManager,
+            IBankEconomyManager bankManager,
             Localization localization,
             ICurrencyFormatter currencyFormatter
     ) {
@@ -62,13 +62,15 @@ public class BalanceCommand implements ICommand {
 
     private ICommandResult handlePlayer(Player p) {
         final var balance = bankManager.getBalance(p);
-        final var limit = bankManager.getLimit(p);
+        final var limit = bankManager.getBankLevelLimit(p);
 
         final var component = new ComponentBuilder(localization.getBalance())
                 .color(ChatColor.DARK_GREEN).bold(true)
                 .append(": ")
                 .append(currencyFormatter.formatCurrency(balance))
+                .color(ChatColor.GOLD)
                 .append(".\n")
+                .color(ChatColor.DARK_GREEN)
                 .append(localization.getBalanceLimit())
                 .color(ChatColor.AQUA).bold(false)
                 .append(": ")

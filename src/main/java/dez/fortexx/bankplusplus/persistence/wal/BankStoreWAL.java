@@ -62,6 +62,9 @@ public class BankStoreWAL implements IBankStoreWAL {
             if (transaction == BankUpgradeTransaction.instance) {
                 finalLevel++;
             }
+            else if (transaction == BankDowngradeTransaction.instance) {
+                finalLevel--;
+            }
         }
 
         return finalLevel;
@@ -91,6 +94,8 @@ public class BankStoreWAL implements IBankStoreWAL {
 
             if (transaction == BankUpgradeTransaction.instance) {
                 levelAcc++;
+            } else if (transaction == BankDowngradeTransaction.instance) {
+                levelAcc--;
             }
         }
 

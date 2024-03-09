@@ -25,3 +25,11 @@ permissions:
     children:
       bankplusplus.fees.bypass.deposit: true
       bankplusplus.fees.bypass.withdraw: true
+  bankplusplus.admin:
+    default: op
+    children:
+      bankplusplus.admin.playerbalance: true
+      bankplusplus.admin.give: true
+      bankplusplus.admin.take: true
+      bankplusplus.admin.upgrade: true
+      bankplusplus.admin.downgrade: true

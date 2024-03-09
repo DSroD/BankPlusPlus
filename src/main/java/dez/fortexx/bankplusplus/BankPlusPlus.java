@@ -1,13 +1,15 @@
 package dez.fortexx.bankplusplus;
 
 import dez.fortexx.bankplusplus.async.BlockingScope;
-import dez.fortexx.bankplusplus.bank.BankManager;
-import dez.fortexx.bankplusplus.bank.balance.BankEconomyManager;
+import dez.fortexx.bankplusplus.bank.BankEconomyManager;
+import dez.fortexx.bankplusplus.bank.BankTransactionManager;
 import dez.fortexx.bankplusplus.bank.fees.PercentageFeeProvider;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.UpgradePermissionManager;
+import dez.fortexx.bankplusplus.commands.admin.*;
 import dez.fortexx.bankplusplus.commands.api.CommandDispatcher;
+import dez.fortexx.bankplusplus.commands.api.arguments.OfflinePlayerArgument;
 import dez.fortexx.bankplusplus.commands.api.arguments.validator.BasicValidator;
 import dez.fortexx.bankplusplus.commands.user.*;
 import dez.fortexx.bankplusplus.configuration.PluginConfiguration;
@@ -17,10 +19,10 @@ import dez.fortexx.bankplusplus.handlers.PlayerJoinHandler;
 import dez.fortexx.bankplusplus.localization.Localization;
 import dez.fortexx.bankplusplus.logging.BukkitPluginLogger;
 import dez.fortexx.bankplusplus.persistence.IScheduledPersistence;
+import dez.fortexx.bankplusplus.persistence.api.Failure;
 import dez.fortexx.bankplusplus.persistence.cache.LRUBankStoreCache;
 import dez.fortexx.bankplusplus.persistence.hikari.HikariBankStore;
 import dez.fortexx.bankplusplus.persistence.hikari.HikariBankStoreConfig;
-import dez.fortexx.bankplusplus.persistence.api.Failure;
 import dez.fortexx.bankplusplus.persistence.wal.BankStoreWAL;
 import dez.fortexx.bankplusplus.placeholders.BankPlusPlusPlaceholderExpansion;
 import dez.fortexx.bankplusplus.scheduler.BukkitScheduler;
@@ -28,8 +30,6 @@ import dez.fortexx.bankplusplus.scheduler.IScheduler;
 import dez.fortexx.bankplusplus.utils.ITransactionRounding;
 import dez.fortexx.bankplusplus.utils.TimeProvider;
 import dez.fortexx.bankplusplus.utils.formatting.CurrencyFormatter;
-import dez.fortexx.bankplusplus.utils.formatting.ICurrencyFormatter;
-import dez.fortexx.bankplusplus.utils.formatting.IUpgradeRequirementFormatter;
 import dez.fortexx.bankplusplus.utils.formatting.UpgradeRequirementFormatter;
 import dez.fortexx.bankplusplus.vault.VaultEconomy;
 import net.milkbowl.vault.economy.Economy;
@@ -38,7 +38,6 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.RoundingMode;
@@ -63,7 +62,7 @@ public final class BankPlusPlus extends JavaPlugin {
         /*
          * Bukkit specific and other plugin interop
          */
-        final var eventCaller = new BukkitEventDispatcher();
+        final var eventDispatcher = new BukkitEventDispatcher();
         final var logger = new BukkitPluginLogger(this, config.getLogLevel());
         final var scheduler = new BukkitScheduler(this);
         this.scheduler = scheduler;
@@ -112,37 +111,45 @@ public final class BankPlusPlus extends JavaPlugin {
                 rounding
         );
 
+        final var upgradePermissionNode = "bankplusplus.upgrade";
+        final var bankUpgradePermissionManager = new UpgradePermissionManager(upgradePermissionNode);
+
         /*
          * BANK MANAGER
          */
-        final var bankEconomyManager = new BankEconomyManager(bankStore);
+        final var bankEconomyManager = new BankEconomyManager(
+                bankStore,
+                bankUpgradePermissionManager,
+                eventDispatcher,
+                logger
+        );
+
         final var economyManagers = List.of(
                 balanceManager,
                 bankEconomyManager
         );
-        final var upgradePermissionNode = "bankplusplus.upgrade";
-        final var bankUpgradePermissionChecker = new UpgradePermissionManager(upgradePermissionNode);
-
-        final var bankLevels = config.getBankLevels()
+        final var bankLevels =  config.getBankLevels()
                 .stream()
                 .map(level -> level.toBankLimit(economyManagers, rounding))
                 .toList();
 
+        bankEconomyManager.setBankLimits(bankLevels);
+
+
+
         // Register upgrade permission node for each level (except the first one) of bank
         final var registerUpgradeNode = registerUpgradePermissionNode(
                 "Allows to upgrade to this bank level",
-                bankUpgradePermissionChecker
+                bankUpgradePermissionManager
         );
         bankLevels.stream().skip(1)
                 .forEach(registerUpgradeNode);
 
-        final var bankManager = new BankManager(
-                bankLevels,
+        final var bankTransactionManager = new BankTransactionManager(
                 balanceManager,
                 bankEconomyManager,
-                bankUpgradePermissionChecker,
                 taxProvider,
-                eventCaller,
+                eventDispatcher,
                 rounding,
                 logger
         );
@@ -157,11 +164,28 @@ public final class BankPlusPlus extends JavaPlugin {
         /*
          * COMMANDS
          */
-        final var bankCommandDispatcher = createCommandDispatcher(
+        final var argumentValidator = new BasicValidator();
+        final var cachedOfflinePlayerArgument = new OfflinePlayerArgument(
+                localization.getPlayer().toLowerCase(),
+                this,
+                timeProvider
+        );
+        final var bankCommandDispatcher = new CommandDispatcher(
+                "bank",
+                List.of(
+                        new BalanceCommand(bankEconomyManager, localization, currencyFormatter),
+                        new InfoCommand(bankEconomyManager, localization, currencyFormatter, upgradeRequirementFormatter),
+                        new DepositCommand(bankTransactionManager, localization, currencyFormatter),
+                        new WithdrawCommand(bankTransactionManager, localization, currencyFormatter),
+                        new UpgradeCommand(bankEconomyManager, localization, currencyFormatter, upgradeRequirementFormatter),
+                        new PlayerBalanceCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
+                        new GiveCommand(bankEconomyManager, localization, currencyFormatter, logger, cachedOfflinePlayerArgument),
+                        new TakeCommand(bankEconomyManager, localization, currencyFormatter, logger, cachedOfflinePlayerArgument),
+                        new PlayerUpgradeCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
+                        new PlayerDowngradeCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument)
+                ),
                 localization,
-                bankManager,
-                currencyFormatter,
-                upgradeRequirementFormatter
+                argumentValidator
         );
         bankCommandDispatcher.register(this);
 
@@ -184,31 +208,9 @@ public final class BankPlusPlus extends JavaPlugin {
          * Placeholder API
          */
         if (this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            final var expansion = new BankPlusPlusPlaceholderExpansion(this, bankStore, currencyFormatter);
+            final var expansion = new BankPlusPlusPlaceholderExpansion(this, bankEconomyManager, currencyFormatter);
             expansion.register();
         }
-    }
-
-    @NotNull
-    private static CommandDispatcher createCommandDispatcher(
-            Localization localization,
-            BankManager bankManager,
-            ICurrencyFormatter currencyFormatter,
-            IUpgradeRequirementFormatter upgradeRequirementFormatter
-    ) {
-        final var argumentValidator = new BasicValidator();
-        return new CommandDispatcher(
-                "bank",
-                List.of(
-                    new DepositCommand(bankManager, localization, currencyFormatter),
-                    new WithdrawCommand(bankManager, localization, currencyFormatter),
-                    new BalanceCommand(bankManager, localization, currencyFormatter),
-                    new UpgradeCommand(bankManager, localization, currencyFormatter, upgradeRequirementFormatter),
-                    new InfoCommand(bankManager, localization, currencyFormatter, upgradeRequirementFormatter)
-                ),
-                localization,
-                argumentValidator
-        );
     }
 
     @Nullable

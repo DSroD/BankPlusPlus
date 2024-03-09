@@ -17,23 +17,34 @@ Just drop the JAR from artifacts (TODO - github actions) into plugins folder in 
 
 ### Commands
 
-| Command                   | Permission required                                | Description                                 |
-|---------------------------|----------------------------------------------------|---------------------------------------------|
-| `/bank info`              | bankplusplus.use                                   | Information about bank account and upgrades |
-| `/bank balance`           | bankplusplus.use                                   | Balance of the bank account                 |
-| `/bank deposit [amount]`  | bankplusplus.use                                   | Deposit give amount to the bank             |
-| `/bank withdraw [amount]` | bankplusplus.use                                   | Withdraws given amount from the bank        |
-| `/bank upgrade`           | bankplusplus.use + see [Permissions](#permissions) | Upgrades bank level                         |
+| Command                        | Permission required                                | Description                                                                       |
+|--------------------------------|----------------------------------------------------|-----------------------------------------------------------------------------------|
+| `/bank info`                   | bankplusplus.use                                   | Information about bank account and upgrades                                       |
+| `/bank balance`                | bankplusplus.use                                   | Balance of the bank account                                                       |
+| `/bank deposit [amount]`       | bankplusplus.use                                   | Deposit give amount to the bank                                                   |
+| `/bank withdraw [amount]`      | bankplusplus.use                                   | Withdraws given amount from the bank                                              |
+| `/bank upgrade`                | bankplusplus.use + see [Permissions](#permissions) | Upgrades bank level                                                               |
+| `/bank pbalance [player]`      | bankplusplus.admin.playerbalance                   | Balance of players bank account                                                   |
+| `/bank give [player] [amount]` | bankplusplus.admin.give                            | Gives money to the players account, considering limits                            |
+| `/bank take [player] [amount]` | bankplusplus.admin.take                            | Takes money from the players account (can not go below zero)                      |
+| `/bank pupgrade [player]`      | bankplusplus.admin.upgrade                         | Upgrades the bank of player, ignoring permissions and not taking any requirements |
+| `/bank pdowngrade [player]`    | bankplusplus.admin.downgrade                       | Downgrades the bank of player                                                     |
 
 ### Permissions
 
-| Permission                          | Description                                        |
-|-------------------------------------|----------------------------------------------------|
-| `bankplusplus.use`                  | Allows usage of all basic commands                 |
-| `bankplusplus.fees.bypass`          | User ignores deposit and withdraw fee              |
-| `bankplusplus.fees.bypass.deposit`  | User ignores deposit fee                           |
-| `bankplusplus.fees.bypass.withdraw` | User ignores withdraw fee                          |
-| `bankplusplus.upgrade.[level_name]` | Allows user to upgrade bank to the specified level |
+| Permission                          | Description                                                       |
+|-------------------------------------|-------------------------------------------------------------------|
+| `bankplusplus.use`                  | Allows usage of all basic commands                                |
+| `bankplusplus.fees.bypass`          | User ignores deposit and withdraw fee                             |
+| `bankplusplus.fees.bypass.deposit`  | User ignores deposit fee                                          |
+| `bankplusplus.fees.bypass.withdraw` | User ignores withdraw fee                                         |
+| `bankplusplus.upgrade.[level_name]` | Allows user to upgrade bank to the specified level                |
+| `bankplusplus.admin`                | Allows use of all admin commands (see respective sub-permissions) |
+| `bankplusplus.admin.playerbalance`  | Allows use of the pbalance command                                |
+| `bankplusplus.admin.give`           | Allows use of the give command                                    |
+| `bankplusplus.admin.take`           | Allows use of the take command                                    |
+| `bankplusplus.admin.upgrade`        | Allows use of the pupgrade command                                |
+| `bankplusplus.admin.downgrade`      | Allows use of the pdowngrade command                              |
 
 #### Notes:
 
@@ -52,6 +63,18 @@ Withdrawals are done in such a way the player actually receives the amount asked
 Deposits are done in the opposite way - fee is deducted from the `amount` argument - actual change in the bank account is
 *smaller* than `amount` argument.
 
+## Placeholders
+
+This plugin implements placeholder extension.
+You can use following placeholders if PlaceholderAPI is installed
+on the server.
+
+| Placeholder                 | Description                                    |
+|-----------------------------|------------------------------------------------|
+| %bankplusplus_bank_balance% | Balance of players bank account                |
+| %bankplusplus_bank_level%   | Level name of players bank account             |
+| %bankplusplus_bank_limit%   | Maximum money player can have in the account   | 
+
 ## Building from source
 
 Use gradle tasks to build the plugin from source. Shadow gradle plugin is
@@ -60,14 +83,11 @@ shadowJar task to build the actual jar file.
 
 ## TODO
 
-- GitHub actions to build the plugin and provide artifacts
-- Interest (online/offline based on permissions/configuration and bank level)
-- Admin commands for managing bank - setting and inspecting levels and bank balance of
-players on the server
-- Transactions for BankManager instead of *check and hope for the best* approach
 - More persistence providers (such as file databases)
 - Fee levels (i.e. based on permissions/configuration and bank level)
+- More tests, especially integration tests
 - Some cleanup and improvement on design choices
+- Interest (online/offline based on permissions/configuration and bank level)
 
 ## Contributing
 

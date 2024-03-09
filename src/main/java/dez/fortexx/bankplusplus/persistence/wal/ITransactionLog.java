@@ -1,4 +1,4 @@
 package dez.fortexx.bankplusplus.persistence.wal;
 
-public sealed interface ITransactionLog permits BankDepositOrWithdrawTransaction, BankUpgradeTransaction {
+public sealed interface ITransactionLog permits BankDepositOrWithdrawTransaction, BankDowngradeTransaction, BankUpgradeTransaction {
 }

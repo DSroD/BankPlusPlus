@@ -35,7 +35,7 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.11.5'
     compileOnly 'com.zaxxer:HikariCP:5.0.1'
 
-    implementation 'com.github.Exlll.ConfigLib:configlib-paper:v4.4.0'
+    implementation 'com.github.Exlll.ConfigLib:configlib-paper:v4.5.0'
 
     testImplementation "org.spigotmc:spigot-api:1.18.1-R0.1-SNAPSHOT"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'

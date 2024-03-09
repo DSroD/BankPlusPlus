@@ -31,7 +31,7 @@ public class Configurator {
             }
         }
 
-        return YamlConfigurations.load(configPath, cls, properties);
+        return YamlConfigurations.update(configPath, cls, properties);
     }
 
     private static <T> void saveDefault(Class<T> cls, Path p, YamlConfigurationProperties properties) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {

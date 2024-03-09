@@ -1,6 +1,6 @@
 package dez.fortexx.bankplusplus.events;
 
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -8,10 +8,10 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerBankUpgradeEvent extends Event {
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    private final Player player;
+    private final OfflinePlayer player;
     private final int newLevel;
 
-    public PlayerBankUpgradeEvent(Player player, int newLevel) {
+    public PlayerBankUpgradeEvent(OfflinePlayer player, int newLevel) {
         this.player = player;
         this.newLevel = newLevel;
     }
@@ -22,7 +22,7 @@ public class PlayerBankUpgradeEvent extends Event {
         return HANDLER_LIST;
     }
 
-    public Player getPlayer() {
+    public OfflinePlayer getPlayer() {
         return player;
     }
 

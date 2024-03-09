@@ -7,6 +7,7 @@ public interface IBankStore {
     boolean addBankFunds(UUID playerUUID, BigDecimal amount);
     boolean takeBankFunds(UUID playerUUID, BigDecimal amount);
     boolean upgradeLevel(UUID playerUUID);
+    boolean downgradeLevel(UUID playerUUID);
     BigDecimal getBankFunds(UUID playerUUID);
     int getBankLevel(UUID playerUUID);
 }
