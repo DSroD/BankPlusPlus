@@ -69,10 +69,11 @@ This plugin implements placeholder extension.
 You can use following placeholders if PlaceholderAPI is installed
 on the server.
 
-| Placeholder                 | Description                     |
-|-----------------------------|---------------------------------|
-| %bankplusplus_bank_balance% | Balance of players bank account |
-| %bankplusplus_bank_level%   | Level of players bank account   |   
+| Placeholder                 | Description                                    |
+|-----------------------------|------------------------------------------------|
+| %bankplusplus_bank_balance% | Balance of players bank account                |
+| %bankplusplus_bank_level%   | Level name of players bank account             |
+| %bankplusplus_bank_limit%   | Maximum money player can have in the account   | 
 
 ## Building from source
 

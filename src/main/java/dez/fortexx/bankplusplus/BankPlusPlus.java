@@ -208,7 +208,7 @@ public final class BankPlusPlus extends JavaPlugin {
          * Placeholder API
          */
         if (this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            final var expansion = new BankPlusPlusPlaceholderExpansion(this, bankStore, currencyFormatter);
+            final var expansion = new BankPlusPlusPlaceholderExpansion(this, bankEconomyManager, currencyFormatter);
             expansion.register();
         }
     }

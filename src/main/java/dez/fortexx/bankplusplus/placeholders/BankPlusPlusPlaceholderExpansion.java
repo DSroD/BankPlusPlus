@@ -1,6 +1,7 @@
 package dez.fortexx.bankplusplus.placeholders;
 
 import dez.fortexx.bankplusplus.BankPlusPlus;
+import dez.fortexx.bankplusplus.bank.IBankEconomyManager;
 import dez.fortexx.bankplusplus.persistence.IBankStore;
 import dez.fortexx.bankplusplus.utils.formatting.ICurrencyFormatter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -9,16 +10,16 @@ import org.jetbrains.annotations.NotNull;
 
 public class BankPlusPlusPlaceholderExpansion extends PlaceholderExpansion {
     private final BankPlusPlus plugin;
-    private final IBankStore bankStore;
+    private final IBankEconomyManager bankEconomyManager;
     private final ICurrencyFormatter currencyFormatter;
 
     public BankPlusPlusPlaceholderExpansion(
             BankPlusPlus plugin,
-            IBankStore bankStore,
+            IBankEconomyManager bankEconomyManager,
             ICurrencyFormatter currencyFormatter
     ) {
         this.plugin = plugin;
-        this.bankStore = bankStore;
+        this.bankEconomyManager = bankEconomyManager;
         this.currencyFormatter = currencyFormatter;
     }
 
@@ -45,13 +46,18 @@ public class BankPlusPlusPlaceholderExpansion extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
         if (params.equalsIgnoreCase("bank_balance")) {
-            final var balance = bankStore.getBankFunds(player.getUniqueId());
+            final var balance = bankEconomyManager.getBalance(player);
             return currencyFormatter.formatCurrency(balance);
         }
 
         if (params.equalsIgnoreCase("bank_level")) {
-            final var level = bankStore.getBankLevel(player.getUniqueId());
-            return Integer.toString(level);
+            final var level = bankEconomyManager.getBankLevelLimit(player);
+            return level.name();
+        }
+
+        if (params.equalsIgnoreCase("bank_limit")) {
+            final var level = bankEconomyManager.getBankLevelLimit(player);
+            return currencyFormatter.formatCurrency(level.maximumMoney());
         }
 
         return null;
