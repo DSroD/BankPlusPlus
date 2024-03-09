@@ -13,6 +13,8 @@ public class CommandDescriptionLocalization {
     private String pbalance = "get account balance of other players";
     private String give = "gives money to the account of the player";
     private String take = "takes money from the account of the player";
+    private String pupgrade = "upgrade account of another player";
+    private String pdowngrade = "downgrade account of another player";
     public String getWithdrawCommandDescription() {
         return withdraw;
     }
@@ -43,5 +45,13 @@ public class CommandDescriptionLocalization {
 
     public String getTakeDescription() {
         return take;
+    }
+
+    public String getPupgradeDescription() {
+        return pupgrade;
+    }
+
+    public String getPdowngradeDescription() {
+        return pdowngrade;
     }
 }

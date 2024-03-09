@@ -27,6 +27,12 @@ public class BankStoreMock implements IBankStore {
     }
 
     @Override
+    public boolean downgradeLevel(UUID playerUUID) {
+        this.level = this.level - 1;
+        return true;
+    }
+
+    @Override
     public BigDecimal getBankFunds(UUID playerUUID) {
         return money;
     }

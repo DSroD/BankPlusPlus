@@ -1,6 +1,7 @@
 package dez.fortexx.bankplusplus.commands.admin;
 
 import dez.fortexx.bankplusplus.bank.IBankEconomyManager;
+import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.commands.api.ICommand;
 import dez.fortexx.bankplusplus.commands.api.arguments.ICommandArgument;
 import dez.fortexx.bankplusplus.commands.api.arguments.OfflinePlayerArgument;
@@ -11,6 +12,7 @@ import dez.fortexx.bankplusplus.utils.ITimeProvider;
 import dez.fortexx.bankplusplus.utils.formatting.ICurrencyFormatter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -18,32 +20,33 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-public class PlayerBalanceCommand implements ICommand {
-    private final OfflinePlayerArgument playerArgument;
+public class PlayerUpgradeCommand implements ICommand {
     private final IBankEconomyManager bankEconomyManager;
-    private final ICurrencyFormatter currencyFormatter;
     private final Localization localization;
+    private final ICurrencyFormatter currencyFormatter;
 
-    public PlayerBalanceCommand(
+    private final OfflinePlayerArgument playerArgument;
+
+    public PlayerUpgradeCommand(
             IBankEconomyManager bankEconomyManager,
             Localization localization,
             ICurrencyFormatter currencyFormatter,
             OfflinePlayerArgument playerArgument
     ) {
-        this.playerArgument = playerArgument;
         this.bankEconomyManager = bankEconomyManager;
-        this.currencyFormatter = currencyFormatter;
         this.localization = localization;
+        this.currencyFormatter = currencyFormatter;
+        this.playerArgument = playerArgument ;
     }
 
     @Override
     public @NotNull String getCommandName() {
-        return "pbalance";
+        return "pupgrade";
     }
 
     @Override
     public @NotNull String getCommandDescription() {
-        return localization.getCommandDescriptions().getPbalanceDescription();
+        return localization.getCommandDescriptions().getPupgradeDescription();
     }
 
     @Override
@@ -55,33 +58,46 @@ public class PlayerBalanceCommand implements ICommand {
 
     @Override
     public @NotNull Optional<String> getPermission() {
-        return Optional.of("bankplusplus.admin.playerbalance");
+        return Optional.of("bankplusplus.admin.upgrade");
     }
 
     @Override
     public @NotNull ICommandResult invoke(CommandSender sender, String[] args) {
-        final var playerName = args[0];
-        final var offlinePlayer = playerArgument.fromString(playerName);
+        final var player = playerArgument.fromString(args[0]);
 
-        if (offlinePlayer == null) {
+        if (player == null) {
             return errorResult(localization.getCommandBase().getPlayerNotFound());
         }
 
-        final var balanceResult = bankEconomyManager.getBalance(offlinePlayer);
+        final var newLimit = bankEconomyManager.forceUpgradeLimits(player);
 
-        final var component = new ComponentBuilder(localization.getBalance())
+        return newLimit.map(
+                (limit) -> successResult(player, limit)
+        ).orElseGet(
+                () -> errorResult(
+                        localization.getCommandAdmin().getUpgradeFailed() + " "
+                        + player.getName() + ". " + localization.getBankAlreadyMaxLevel() + "."
+                )
+        );
+    }
+
+    private BaseComponentResult successResult(OfflinePlayer player, BankLimit newLimit) {
+        final var component = new ComponentBuilder(localization.getCommandAdmin().getUpgradeSuccessful())
                 .color(ChatColor.DARK_GREEN).bold(true)
-                .append("(")
-                .append(playerName)
-                .append("): ")
-                .append(currencyFormatter.formatCurrency(balanceResult))
+                .append(" ")
+                .append(player.getName())
+                .append(". ")
+                .append("New level: ")
+                .bold(false)
+                .append(newLimit.name())
                 .color(ChatColor.GOLD)
-                .append(".")
-                .color(ChatColor.DARK_GREEN)
+                .append(" (")
+                .color(ChatColor.GREEN)
+                .append(currencyFormatter.formatCurrency(newLimit.maximumMoney()))
+                .append(").")
                 .create();
 
         return new BaseComponentResult(component);
-
     }
 
     private BaseComponentResult errorResult(String message) {

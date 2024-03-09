@@ -1,4 +1,4 @@
-package dez.fortexx.bankplusplus.bank.balance;
+package dez.fortexx.bankplusplus.bank;
 
 import dez.fortexx.bankplusplus.api.economy.result.*;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
@@ -145,5 +145,46 @@ public class BankEconomyManager implements IBankEconomyManager {
         return Optional.of(nextLevelIdx)
                 .filter(x -> x < bankLimits.size())
                 .map(bankLimits::get);
+    }
+
+    @Override
+    public Optional<BankLimit> forceUpgradeLimits(OfflinePlayer offlinePlayer) {
+        final var playerUUID = offlinePlayer.getUniqueId();
+        final var currentLevelNumber = bankStore.getBankLevel(playerUUID);
+        if (currentLevelNumber >= bankLimits.size()) {
+            return Optional.empty();
+        }
+
+        final var nextLevel = bankLimits.get(currentLevelNumber);
+        final var newLevel = currentLevelNumber + 1;
+
+        bankStore.upgradeLevel(playerUUID);
+
+        eventDispatcher.dispatch(new PlayerBankUpgradeEvent(offlinePlayer, newLevel));
+        logger.info(
+                () -> "[ForceUpgrade] " + offlinePlayer.getName() + " upgraded bank to level " + newLevel
+        );
+
+        return Optional.of(nextLevel);
+    }
+
+    @Override
+    public Optional<BankLimit> forceDowngradeLimit(OfflinePlayer offlinePlayer) {
+        final var playerUUID = offlinePlayer.getUniqueId();
+        final var currentLevelNumber = bankStore.getBankLevel(playerUUID);
+        if (currentLevelNumber == 1) {
+            return Optional.empty();
+        }
+
+        final var previousIdx = currentLevelNumber - 2;
+        final var previousLevel = bankLimits.get(previousIdx);
+
+        bankStore.downgradeLevel(playerUUID);
+
+        logger.info(
+                () -> "[ForceDowngrade] " + offlinePlayer.getName() + " upgraded bank to level " + (previousIdx + 1)
+        );
+
+        return Optional.of(previousLevel);
     }
 }

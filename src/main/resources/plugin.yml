@@ -31,3 +31,5 @@ permissions:
       bankplusplus.admin.playerbalance: true
       bankplusplus.admin.give: true
       bankplusplus.admin.take: true
+      bankplusplus.admin.upgrade: true
+      bankplusplus.admin.downgrade: true

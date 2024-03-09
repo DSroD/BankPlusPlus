@@ -4,7 +4,7 @@ import dez.fortexx.bankplusplus.api.economy.result.AmountTooSmall;
 import dez.fortexx.bankplusplus.api.economy.result.DescribedFailure;
 import dez.fortexx.bankplusplus.api.economy.result.InsufficientFunds;
 import dez.fortexx.bankplusplus.api.economy.result.Success;
-import dez.fortexx.bankplusplus.bank.balance.IBankEconomyManager;
+import dez.fortexx.bankplusplus.bank.IBankEconomyManager;
 import dez.fortexx.bankplusplus.commands.api.ICommand;
 import dez.fortexx.bankplusplus.commands.api.arguments.BigDecimalArgument;
 import dez.fortexx.bankplusplus.commands.api.arguments.ICommandArgument;
@@ -33,20 +33,15 @@ public class TakeCommand implements ICommand {
     private final BigDecimalArgument amountArgument;
 
     public TakeCommand(
-            Plugin plugin,
             IBankEconomyManager bankEconomyManager,
             Localization localization,
-            ITimeProvider timeProvider,
-            ICurrencyFormatter currencyFormatter
+            ICurrencyFormatter currencyFormatter,
+            OfflinePlayerArgument playerArgument
     ) {
         this.bankEconomyManager = bankEconomyManager;
         this.localization = localization;
         this.currencyFormatter = currencyFormatter;
-        playerArgument = new OfflinePlayerArgument(
-                localization.getPlayer().toLowerCase(),
-                plugin,
-                timeProvider
-        );
+        this.playerArgument =  playerArgument;
         amountArgument = new BigDecimalArgument(
                 localization.getAmount().toLowerCase()
         );
@@ -87,6 +82,7 @@ public class TakeCommand implements ICommand {
         final var result = bankEconomyManager.withdraw(player, amount);
 
         if (result instanceof Success sr) {
+            // TODO: log success
             return successResult(sr, player.getName());
         }
 

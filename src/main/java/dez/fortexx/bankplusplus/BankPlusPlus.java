@@ -2,15 +2,14 @@ package dez.fortexx.bankplusplus;
 
 import dez.fortexx.bankplusplus.async.BlockingScope;
 import dez.fortexx.bankplusplus.bank.BankTransactionManager;
-import dez.fortexx.bankplusplus.bank.balance.BankEconomyManager;
+import dez.fortexx.bankplusplus.bank.BankEconomyManager;
 import dez.fortexx.bankplusplus.bank.fees.PercentageFeeProvider;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.UpgradePermissionManager;
-import dez.fortexx.bankplusplus.commands.admin.GiveCommand;
-import dez.fortexx.bankplusplus.commands.admin.PlayerBalanceCommand;
-import dez.fortexx.bankplusplus.commands.admin.TakeCommand;
+import dez.fortexx.bankplusplus.commands.admin.*;
 import dez.fortexx.bankplusplus.commands.api.CommandDispatcher;
+import dez.fortexx.bankplusplus.commands.api.arguments.OfflinePlayerArgument;
 import dez.fortexx.bankplusplus.commands.api.arguments.validator.BasicValidator;
 import dez.fortexx.bankplusplus.commands.user.*;
 import dez.fortexx.bankplusplus.configuration.PluginConfiguration;
@@ -166,6 +165,11 @@ public final class BankPlusPlus extends JavaPlugin {
          * COMMANDS
          */
         final var argumentValidator = new BasicValidator();
+        final var cachedOfflinePlayerArgument = new OfflinePlayerArgument(
+                localization.getPlayer().toLowerCase(),
+                this,
+                timeProvider
+        );
         final var bankCommandDispatcher = new CommandDispatcher(
                 "bank",
                 List.of(
@@ -174,9 +178,11 @@ public final class BankPlusPlus extends JavaPlugin {
                         new DepositCommand(bankTransactionManager, localization, currencyFormatter),
                         new WithdrawCommand(bankTransactionManager, localization, currencyFormatter),
                         new UpgradeCommand(bankEconomyManager, localization, currencyFormatter, upgradeRequirementFormatter),
-                        new PlayerBalanceCommand(this, bankEconomyManager, localization, timeProvider, currencyFormatter),
-                        new GiveCommand(this, bankEconomyManager, localization, timeProvider, currencyFormatter),
-                        new TakeCommand(this, bankEconomyManager, localization, timeProvider, currencyFormatter)
+                        new PlayerBalanceCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
+                        new GiveCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
+                        new TakeCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
+                        new PlayerUpgradeCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
+                        new PlayerDowngradeCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument)
                 ),
                 localization,
                 argumentValidator

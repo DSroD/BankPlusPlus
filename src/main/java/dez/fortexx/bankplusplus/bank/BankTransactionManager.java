@@ -3,7 +3,6 @@ package dez.fortexx.bankplusplus.bank;
 import dez.fortexx.bankplusplus.api.banktransactions.TransactionType;
 import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
 import dez.fortexx.bankplusplus.api.economy.result.*;
-import dez.fortexx.bankplusplus.bank.balance.IBankEconomyManager;
 import dez.fortexx.bankplusplus.bank.fees.IFeeProvider;
 import dez.fortexx.bankplusplus.events.IEventDispatcher;
 import dez.fortexx.bankplusplus.events.PlayerBankTransactionEvent;

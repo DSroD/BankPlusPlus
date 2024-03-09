@@ -3,7 +3,7 @@ package bank;
 import dez.fortexx.bankplusplus.api.economy.IEconomyManager;
 import dez.fortexx.bankplusplus.api.economy.result.LimitViolation;
 import dez.fortexx.bankplusplus.api.economy.result.Success;
-import dez.fortexx.bankplusplus.bank.balance.BankEconomyManager;
+import dez.fortexx.bankplusplus.bank.BankEconomyManager;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.MoneyUpgradeRequirement;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;

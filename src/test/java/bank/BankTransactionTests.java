@@ -6,7 +6,7 @@ import dez.fortexx.bankplusplus.api.economy.result.EconomyResult;
 import dez.fortexx.bankplusplus.api.economy.result.InsufficientFunds;
 import dez.fortexx.bankplusplus.api.economy.result.Success;
 import dez.fortexx.bankplusplus.bank.BankTransactionManager;
-import dez.fortexx.bankplusplus.bank.balance.IBankEconomyManager;
+import dez.fortexx.bankplusplus.bank.IBankEconomyManager;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.result.IUpgradeResult;
 import dez.fortexx.bankplusplus.bank.upgrade.result.SuccessUpgradeResult;
@@ -159,6 +159,18 @@ public class BankTransactionTests {
         // Unused in tests
         @Override
         public Optional<BankLimit> getNextBankLevelLimit(OfflinePlayer player) {
+            return Optional.empty();
+        }
+
+        // Unused in tests
+        @Override
+        public Optional<BankLimit> forceUpgradeLimits(OfflinePlayer offlinePlayer) {
+            return Optional.empty();
+        }
+
+        // Unused in tests
+        @Override
+        public Optional<BankLimit> forceDowngradeLimit(OfflinePlayer offlinePlayer) {
             return Optional.empty();
         }
     }

@@ -1,6 +1,6 @@
 package dez.fortexx.bankplusplus.commands.user;
 
-import dez.fortexx.bankplusplus.bank.balance.IBankEconomyManager;
+import dez.fortexx.bankplusplus.bank.IBankEconomyManager;
 import dez.fortexx.bankplusplus.commands.api.ICommand;
 import dez.fortexx.bankplusplus.commands.api.arguments.ICommandArgument;
 import dez.fortexx.bankplusplus.commands.api.result.BaseComponentResult;
