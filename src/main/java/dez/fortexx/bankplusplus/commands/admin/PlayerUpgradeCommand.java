@@ -8,13 +8,11 @@ import dez.fortexx.bankplusplus.commands.api.arguments.OfflinePlayerArgument;
 import dez.fortexx.bankplusplus.commands.api.result.BaseComponentResult;
 import dez.fortexx.bankplusplus.commands.api.result.ICommandResult;
 import dez.fortexx.bankplusplus.localization.Localization;
-import dez.fortexx.bankplusplus.utils.ITimeProvider;
 import dez.fortexx.bankplusplus.utils.formatting.ICurrencyFormatter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

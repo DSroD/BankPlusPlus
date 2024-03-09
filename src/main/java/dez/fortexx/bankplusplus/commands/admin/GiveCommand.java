@@ -13,12 +13,11 @@ import dez.fortexx.bankplusplus.commands.api.result.BaseComponentResult;
 import dez.fortexx.bankplusplus.commands.api.result.ErrorResult;
 import dez.fortexx.bankplusplus.commands.api.result.ICommandResult;
 import dez.fortexx.bankplusplus.localization.Localization;
-import dez.fortexx.bankplusplus.utils.ITimeProvider;
+import dez.fortexx.bankplusplus.logging.ILogger;
 import dez.fortexx.bankplusplus.utils.formatting.ICurrencyFormatter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -28,6 +27,7 @@ public class GiveCommand implements ICommand {
     private final IBankEconomyManager bankEconomyManager;
     private final Localization localization;
     private final ICurrencyFormatter currencyFormatter;
+    private final ILogger logger;
 
     private final OfflinePlayerArgument playerArgument;
     private final BigDecimalArgument amountArgument;
@@ -36,11 +36,13 @@ public class GiveCommand implements ICommand {
             IBankEconomyManager bankEconomyManager,
             Localization localization,
             ICurrencyFormatter currencyFormatter,
+            ILogger logger,
             OfflinePlayerArgument playerArgument
     ) {
         this.bankEconomyManager = bankEconomyManager;
         this.localization = localization;
         this.currencyFormatter = currencyFormatter;
+        this.logger = logger;
         this.playerArgument = playerArgument;
         this.amountArgument = new BigDecimalArgument(
                 localization.getAmount().toLowerCase()
@@ -82,7 +84,9 @@ public class GiveCommand implements ICommand {
         final var result = bankEconomyManager.deposit(player, amount);
 
         if (result instanceof Success sr) {
-            // TODO: log success
+            logger.info(
+                    () -> "[Give] " + player.getName() + " was given " + amount.toPlainString() + " to the bank"
+            );
             return successResult(sr, player.getName());
         }
 

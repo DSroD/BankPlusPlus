@@ -95,8 +95,7 @@ public final class BankTransactionManager implements dez.fortexx.bankplusplus.ba
 
         final var fee = feeProvider.getWithdrawFee(player, roundedAmount);
         final var takenAmount = roundedAmount.add(fee);
-
-        // TODO: transactions
+        
         final var withdrawResult = bankEconomyManager.withdraw(player, takenAmount);
 
         if (withdrawResult instanceof InsufficientFunds isf) {

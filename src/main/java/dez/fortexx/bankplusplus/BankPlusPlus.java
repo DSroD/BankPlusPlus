@@ -1,8 +1,8 @@
 package dez.fortexx.bankplusplus;
 
 import dez.fortexx.bankplusplus.async.BlockingScope;
-import dez.fortexx.bankplusplus.bank.BankTransactionManager;
 import dez.fortexx.bankplusplus.bank.BankEconomyManager;
+import dez.fortexx.bankplusplus.bank.BankTransactionManager;
 import dez.fortexx.bankplusplus.bank.fees.PercentageFeeProvider;
 import dez.fortexx.bankplusplus.bank.limits.BankLimit;
 import dez.fortexx.bankplusplus.bank.upgrade.permissions.IUpgradePermissionManager;
@@ -179,8 +179,8 @@ public final class BankPlusPlus extends JavaPlugin {
                         new WithdrawCommand(bankTransactionManager, localization, currencyFormatter),
                         new UpgradeCommand(bankEconomyManager, localization, currencyFormatter, upgradeRequirementFormatter),
                         new PlayerBalanceCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
-                        new GiveCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
-                        new TakeCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
+                        new GiveCommand(bankEconomyManager, localization, currencyFormatter, logger, cachedOfflinePlayerArgument),
+                        new TakeCommand(bankEconomyManager, localization, currencyFormatter, logger, cachedOfflinePlayerArgument),
                         new PlayerUpgradeCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument),
                         new PlayerDowngradeCommand(bankEconomyManager, localization, currencyFormatter, cachedOfflinePlayerArgument)
                 ),
