@@ -2,7 +2,6 @@ package dez.fortexx.bankplusplus.placeholders;
 
 import dez.fortexx.bankplusplus.BankPlusPlus;
 import dez.fortexx.bankplusplus.bank.IBankEconomyManager;
-import dez.fortexx.bankplusplus.persistence.IBankStore;
 import dez.fortexx.bankplusplus.utils.formatting.ICurrencyFormatter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
